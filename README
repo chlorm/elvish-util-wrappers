@@ -1,0 +1,9 @@
+Elvish Nix
+==========
+
+###### A module that wraps common Nix commands.
+
+```elvish
+epm:install github.com/chlorm/elvish-nix
+use github.com/chlorm/elvish-nix/nix
+```
