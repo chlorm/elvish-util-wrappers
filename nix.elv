@@ -95,7 +95,7 @@ fn rebuild-system [target @args]{
 
 fn search [@pkgAttrs]{
   for local:i $pkgAttrs {
-    nix-env '-q' $i '-f' '<nixpkgs>'
+    nix-env '-qaP' '.*'$i'.*' '-f' '<nixpkgs>'
   }
 }
 
