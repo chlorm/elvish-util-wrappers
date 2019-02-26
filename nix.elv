@@ -54,7 +54,7 @@ fn install [@pkgAttrs]{
   }
 }
 
-fn rebuild-envs {
+fn rebuild-envs [@args]{
   local:envs = [(
     awk '!/^.*\/\*/ && /buildEnv/ {print $1}' (get-env HOME)'/.nixpkgs/config.nix'
   )]
