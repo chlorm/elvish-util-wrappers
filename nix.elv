@@ -90,7 +90,7 @@ fn remove-references [path]{
 
 fn rebuild-system [target @args]{
   # FIXME: Don't hardcode nixpkgs directory
-  sudo nixos-rebuild $target $@args
+  sudo nixos-rebuild $target $@args -I 'nixpkgs='(nix-instantiate --eval -E '<nixpkgs>')
 }
 
 fn search [@pkgAttrs]{
