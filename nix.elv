@@ -62,7 +62,6 @@ fn rebuild-envs [@args]{
   local:exceptions = []
   for local:i $envs {
     try {
-      # FIXME: Don't hardcode nixpkgs directory
       nix-env '-iA' $i '-f' '<nixpkgs>' $@args
     } except e {
       exceptions = [$@exceptions $e]
@@ -89,7 +88,6 @@ fn remove-references [path]{
 }
 
 fn rebuild-system [target @args]{
-  # FIXME: Don't hardcode nixpkgs directory
   sudo nixos-rebuild $target $@args -I 'nixpkgs='(nix-instantiate --eval -E '<nixpkgs>')
 }
 
