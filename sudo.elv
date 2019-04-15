@@ -18,7 +18,7 @@ fn sudo [@cmd]{
     if (== (id -u) 0) {
       fail
     }
-    if (and (!=s (get-env DISPLAY) '')) ?(search-external gksudo)) {
+    if (and (!=s (get-env DISPLAY) '') ?(search-external gksudo)) {
       gksudo $@cmd
     } else {
       sudo $@cmd
