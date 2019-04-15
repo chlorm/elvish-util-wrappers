@@ -1,9 +1,9 @@
-Elvish Nix
-==========
+Elvish Util Wrappers
+====================
 
-###### A module that wraps common Nix commands.
+###### A module that wraps various command line utilities.
 
 ```elvish
-epm:install github.com/chlorm/elvish-nix
-use github.com/chlorm/elvish-nix/nix
+epm:install github.com/chlorm/elvish-util-wrappers
+use github.com/chlorm/elvish-util-wrappers/<util>
 ```

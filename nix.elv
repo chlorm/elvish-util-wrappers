@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+use github.com/chlorm/elvish-util-wrappers/sudo
+
 # Clear environment variables in user environment polluted by makeWrapper.
 fn clear-env {
   unset-env GDK_PIXBUF_MODULE_FILE
@@ -42,7 +44,7 @@ fn find-nixos-closures {
   put [ (find '/nix/store' '-name' '*'(hostname)'*') ]
 }
 
-fn copy-closures [target closures]{
+fn copy-closures [target @closures]{
   for local:i $closures {
     nix-copy-closure '--to' 'root@'$target $i
   }
@@ -88,7 +90,7 @@ fn remove-references [path]{
 }
 
 fn rebuild-system [target @args]{
-  sudo nixos-rebuild $target $@args -I 'nixpkgs='(nix-instantiate --eval -E '<nixpkgs>')
+  sudo:sudo nixos-rebuild $target $@args -I 'nixpkgs='(nix-instantiate --eval -E '<nixpkgs>')
 }
 
 fn search [@pkgAttrs]{
