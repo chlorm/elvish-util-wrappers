@@ -13,18 +13,20 @@
 # limitations under the License.
 
 fn sudo [@cmd]{
+  # Don't use sudo if run as root
+  local:isRoot = (== (id -u) 0)
+  local:hasDisplay = $false
   try {
-    # Don't use sudo if run as root
-    if (== (id -u) 0) {
-      fail
-    }
-    if (and (!=s (get-env DISPLAY) '') ?(search-external gksudo)) {
-      gksudo $@cmd
-    } else {
-      sudo $@cmd
-    }
+    hasDisplay = (!=s (get-env DISPLAY) '')
   } except _ {
-    $@cmd
+    hasDisplay = $false
+  }
+  if (and $hasDisplay ?(search-external gksudo) (not $isRoot)) {
+    gksudo $@cmd
+  } elif (and ?(search-external sudo) (not $isRoot)) {
+    e:sudo $@cmd
+  } else {
+    elvish -c $@cmd
   }
 }
 
