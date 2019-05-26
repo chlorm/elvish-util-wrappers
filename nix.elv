@@ -44,6 +44,11 @@ fn find-nixos-closures {
   put [ (find '/nix/store' '-name' '*'(hostname)'*') ]
 }
 
+fn build-iso [platform]{
+  nix-build (nix-instantiate --eval -E '<nixpkgs>')'/nixos/release.nix' \
+    '-A' 'iso_minimal_new_kernel.'$platform
+}
+
 fn copy-closures [target @closures]{
   for local:i $closures {
     nix-copy-closure '--to' 'root@'$target $i
