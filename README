@@ -1,7 +1,7 @@
 Elvish Util Wrappers
 ====================
 
-###### A module that wraps various command line utilities.
+###### Modules that wrap various command line utilities.
 
 ```elvish
 epm:install github.com/chlorm/elvish-util-wrappers
