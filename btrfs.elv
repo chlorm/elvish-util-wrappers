@@ -14,21 +14,6 @@
 
 use github.com/chlorm/elvish-util-wrappers/sudo
 
-# FIXME: move function to stl
-fn list-contains [list elem]{
-  local:exists = $false
-  for local:i $list {
-    if (==s $i $elem) {
-      exists = $true
-      break
-    }
-  }
-  if (not $exists) {
-    fail
-  }
-  return
-}
-
 fn balance [mode path]{
   local:modes = [
     'cancel'
@@ -37,7 +22,7 @@ fn balance [mode path]{
     'start'
     'status'
   ]
-  list-contains $modes $mode
+  has-value $modes $mode
   local:opts = [ ]
   if (or (==s $mode 'start') (==s $mode 'status')) {
     opts = ['-v']
@@ -51,7 +36,7 @@ fn defrag [path &compression='zstd']{
     'zlib'
     'zstd'
   ]
-  list-contains $compression-algorithms $compression
+  has-value $compression-algorithms $compression
   sudo:sudo 'btrfs' 'filesystem' 'defragment' '-v' '-r' '-c'$compression '-f' $path
 }
 
@@ -63,7 +48,7 @@ fn scrub [mode path]{
     'start'
     'status'
   ]
-  list-contains $modes $mode
+  has-value $modes $mode
   local:opts = [ ]
   if (or (==s $mode 'resume') (==s $mode 'start')) {
     opts = ['-c' '3']
