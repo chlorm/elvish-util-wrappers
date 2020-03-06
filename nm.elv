@@ -29,7 +29,7 @@ fn get-wifi-status {
 
 # Turn wireless devices on/off.
 fn set-wifi-state [state]{
-  if (or (!=s $state 'on') (!=s $state 'off')) {
+  if (not (has-value ['on' 'off'] $state)) {
     fail 'Invalid argument'
   }
   nmcli r wifi $state
