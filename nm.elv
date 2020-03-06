@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+use re
+
+
 # Find connectable wifi ssids.
 fn get-wifi-list {
   put (nmcli d wifi list)
@@ -36,9 +40,20 @@ fn set-wifi-state [state]{
 }
 
 # Returns the first wireless device found.
-# TODO: make sure select and save to XDG_CONFIG_DIR.
 fn get-wifi-interface {
-  put (nmcli d | awk '/wifi/ {print $1; exit}')
+  local:interface=''
+  for local:i [(nmcli d)] {
+    local:s = [(re:split '\s+' $i)]
+    if (==s 'wifi' $s[1]) {
+      interface = $s[0]
+      break
+    }
+  }
+  if (==s '' $interface) {
+    put $interface >&2
+    fail 'no wifi interface'
+  }
+  put $interface
 }
 
 # Add a new connection.
