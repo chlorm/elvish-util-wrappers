@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-use re
+use github.com/chlorm/elvish-util-wrappers/regex
 
 
 fn -len [array]{
@@ -196,14 +196,6 @@ fn -parse-unmerged [status input]{
   put $status
 }
 
-fn -regex-obj [obj]{
-  put $obj[groups][-1:][0][text]
-}
-
-fn -regex [regex string]{
-  put (-regex-obj (re:find $regex $string))
-}
-
 # Initializes a path object if it doesn't exist
 fn -initialize-path [status path]{
   try {
@@ -233,10 +225,10 @@ fn status {
   for local:i $git-status-output {
     local:line = [(splits " " $i)]
     if (==s '#' $line[0]) {
-      local:header = (-regex 'branch.([a-z]+)' $line[1])
+      local:header = (regex:find 'branch.([a-z]+)' $line[1])
       if (==s 'ab' $header) {
-        git-status[branch][ahead]=(-regex '\+(\d+)' $line[2])
-        git-status[branch][behind]=(-regex '-(\d+)' $line[3])
+        git-status[branch][ahead]=(regex:find '\+(\d+)' $line[2])
+        git-status[branch][behind]=(regex:find '-(\d+)' $line[3])
       } else {
         git-status[branch][$header]=$line[2]
       }
