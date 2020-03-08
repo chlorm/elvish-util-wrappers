@@ -24,7 +24,9 @@ fn obj [obj]{
 
 fn find [regex string]{
   try {
-    put (obj (re:find $regex $string))
+    for local:i [(re:find $regex $string)] {
+      put (obj $i)
+    }
   } except _ {
     put ""
   }
