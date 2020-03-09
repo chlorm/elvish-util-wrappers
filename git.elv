@@ -16,14 +16,6 @@
 use github.com/chlorm/elvish-util-wrappers/regex
 
 
-fn -len [array]{
-  local:len = 0
-  for local:i [(keys $array)] {
-    len = (+ $len 1)
-  }
-  put $len
-}
-
 fn -parse-xy [line]{
   local:xyr = [
     &staged=$line[0:1]
@@ -112,7 +104,7 @@ fn -parse-modified [status input]{
 
   status[paths][$path][staged]=$xy[staged]
   status[paths][$path][unstaged]=$xy[unstaged]
-  if (> (-len $sub) 0) {
+  if (> (count $sub) 0) {
     status[paths][$path][submodule]=$sub
   }
   status[paths][$path][mode]=$input[mode]
@@ -149,7 +141,7 @@ fn -parse-rename-copied [status input]{
 
   status[paths][$path][staged]=$xy[staged]
   status[paths][$path][unstaged]=$xy[unstaged]
-  if (> (-len $sub) 0) {
+  if (> (count $sub) 0) {
     status[paths][$path][submodule]=$sub
   }
   status[paths][$path][mode]=$input[mode]
@@ -187,7 +179,7 @@ fn -parse-unmerged [status input]{
 
   status[paths][$path][staged]=$xy[staged]
   status[paths][$path][unstaged]=$xy[unstaged]
-  if (> (-len $sub) 0) {
+  if (> (count $sub) 0) {
     status[paths][$path][submodule]=$sub
   }
   status[paths][$path][mode]=$input[mode]
