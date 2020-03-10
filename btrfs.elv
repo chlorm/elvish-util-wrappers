@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 use github.com/chlorm/elvish-util-wrappers/sudo
+
 
 fn balance [mode path]{
   local:modes = [
@@ -24,7 +26,7 @@ fn balance [mode path]{
   ]
   has-value $modes $mode
   local:opts = [ ]
-  if (or (==s $mode 'start') (==s $mode 'status')) {
+  if (or (==s 'start' $mode) (==s 'status' $mode)) {
     opts = ['-v']
   }
   sudo:sudo 'btrfs' 'balance' $mode $@opts $path
@@ -50,7 +52,7 @@ fn scrub [mode path]{
   ]
   has-value $modes $mode
   local:opts = [ ]
-  if (or (==s $mode 'resume') (==s $mode 'start')) {
+  if (or (==s 'resume' $mode) (==s 'restart' $mode)) {
     opts = ['-c' '3']
   }
   sudo:sudo 'btrfs' 'scrub' $mode $@opts $path
