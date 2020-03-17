@@ -13,7 +13,9 @@
 # limitations under the License.
 
 
-use github.com/chlorm/elvish-util-wrappers/regex
+use github.com/chlorm/elvish-stl/io
+use github.com/chlorm/elvish-stl/path
+use github.com/chlorm/elvish-stl/regex
 
 
 fn -initialize-state [obj class num]{
@@ -26,9 +28,9 @@ fn -initialize-state [obj class num]{
 }
 
 fn -parse-acpi {
-  local:acpi-output = []
+  local:acpi-output = [ ]
   try {
-    acpi-output = [(acpi -a -b)]
+    acpi-output = [ (acpi -a -b) ]
   } except _ {
     fail
   }
@@ -42,7 +44,7 @@ fn -parse-acpi {
     &batteries=[&]
   ]
   for local:i $acpi-output {
-    local:expld = [(splits " " $i)]
+    local:expld = [ (splits " " $i) ]
     if (==s 'Adapter' $expld[0]) {
       local:num = (-num $expld[1])
       state = (-initialize-state $state adapters $num)
@@ -62,32 +64,32 @@ fn -parse-acpi {
 }
 
 fn -sys-uid [dev]{
-  put (cat $E:ROOT'/sys/class/power_supply/'$dev'/device/uid')
+  put [ (io:cat $dev'/device/uid') ][0]
 }
 
 fn -parse-sysfs {
   local:sysfs = $E:ROOT'/sys/class/power_supply'
-  if (not ?(test -d $sysfs)) {
-    fail "can't access sysfs"
+  if (not (os:exists $sysfs)) {
+    fail 'cannot access sysfs'
   }
   local:state = [
     &adapters=[&]
     &batteries=[&]
   ]
-  for local:dev [(ls $sysfs)] {
-    if (==s 'AC' $dev[0:2]) {
+  for local:dev (path:scandir $sysfs)[files] {
+    if (==s 'AC' (path:basename $dev)[0:2]) {
       local:num = (-sys-uid $dev)
       state = (-initialize-state $state adapters $num)
       local:status = off-line
-      if (== 1 (cat $sysfs'/'$dev'/online')) {
+      if (== 1 [ (io:cat $dev'/online') ][0]) {
         status = on-line
       }
       state[adapters][$num][status]=$status
-    } elif (==s 'BAT' $dev[0:3]) {
+    } elif (==s 'BAT' (path:basename $dev)[0:3]) {
       local:num = (-sys-uid $dev)
       state = (-initialize-state $state batteries $num)
-      state[batteries][$num][status]=(cat $sysfs'/'$dev'/status')
-      state[batteries][$num][charge]=(cat $sysfs'/'$dev'/capacity')
+      state[batteries][$num][status]=(io:cat $dev'/status')
+      state[batteries][$num][charge]=(io:cat $dev'/capacity')
     } else {
       put $dev >&2
       fail 'invalid type'

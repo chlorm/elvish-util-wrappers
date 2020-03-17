@@ -1,4 +1,4 @@
-# Copyright (c) 2019, Cody Opel <codyopel@gmail.com>
+# Copyright (c) 2019-2020, Cody Opel <cwopel@chlorm.net>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+use github.com/chlorm/elvish-stl/io
+use github.com/chlorm/elvish-stl/os
+use github.com/chlorm/elvish-stl/regex
 use github.com/chlorm/elvish-util-wrappers/sudo
+
 
 # Clear environment variables in user environment polluted by makeWrapper.
 fn clear-env {
@@ -26,17 +31,22 @@ fn clear-env {
   unset-env XDG_ICON_DIRS
 }
 
-fn find-nixconfig-closures {
-  local:envs = [(
-    awk 'c&&!--c;!/^.*\/\*/ && /buildEnv/ {c=1}' (get-env HOME)'/.nixpkgs/config.nix' |
-      grep -o -P '(?<=").*(?=")'
-  )]
+fn -user-buildenvs {
+  local:envs = [ ]
+  for local:line [ (io:cat (get-env HOME)'/.nixpkgs/config.nix') ] {
+    local:m = (regex:find '([0-9a-zA-Z_-]+)(?:[ ]+|)=.*buildEnv)' $line)
+    if (!=s '' $m) {
+      envs = [ $@envs $m ]
+    }
+  }
+  put $envs
+}
 
-  local:closures = []
-  for local:i $envs {
+fn find-nixconfig-closures {
+  local:closures = [ ]
+  for local:i [ (-user-buildenvs) ] {
     closures = [ $@closures (find '/nix/store' '-name' '*'$i'*') ]
   }
-
   put $closures
 }
 
@@ -55,19 +65,15 @@ fn copy-closures [target @closures]{
   }
 }
 
-fn install [@pkgAttrs]{
-  for local:i $pkgAttrs {
+fn install [@attrs]{
+  for local:i $attrs {
     nix-env '-iA' $i '-f' '<nixpkgs>'
   }
 }
 
 fn rebuild-envs [@args]{
-  local:envs = [(
-    awk '!/^.*\/\*/ && /buildEnv/ {print $1}' (get-env HOME)'/.nixpkgs/config.nix'
-  )]
-
-  local:exceptions = []
-  for local:i $envs {
+  local:exceptions = [ ]
+  for local:i [ (-user-buildenvs) ] {
     try {
       nix-env '-iA' $i '-f' '<nixpkgs>' $@args
     } except e {
@@ -82,14 +88,13 @@ fn rebuild-envs [@args]{
 }
 
 fn remove-references [path]{
-  if (not ?(test -d $path)) {
+  if (not (os:is-dir $path)) {
     fail 'Specified path does not exist: '$path
   }
 
   for local:i [(find -L $path -xtype 1 -name "result*")] {
-    pathDir = (dirname $path)
-    if (and ?(test -f $path'/.git/config') (!=s (cat $path'/.git/config' | grep 'triton') '')) {
-      rm $path
+    if (and (os:is-file $path'/.git/config') (!=s (io:cat $path'/.git/config' | grep 'triton') '')) {
+      os:remove $path
     }
   }
 }
@@ -98,8 +103,8 @@ fn rebuild-system [target @args]{
   sudo:sudo nixos-rebuild $target $@args -I 'nixpkgs='(nix-instantiate --eval -E '<nixpkgs>')
 }
 
-fn search [@pkgAttrs]{
-  for local:i $pkgAttrs {
+fn search [@attrs]{
+  for local:i $attrs {
     nix-env '-qaP' '.*'$i'.*' '-f' '<nixpkgs>'
   }
 }

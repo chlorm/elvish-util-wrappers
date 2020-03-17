@@ -64,7 +64,7 @@ fn -parse-sub [line]{
   local:submodule = [&]
 
   if (==s 'S' $line[0:1]) {
-    for local:i [(keys $s)] {
+    for local:i [ (keys $s) ] {
       if (has-value ['C' 'M' 'U'] $s[$i]) {
         submodule[$i]=$true
       } else {

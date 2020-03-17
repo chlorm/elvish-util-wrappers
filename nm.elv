@@ -33,7 +33,7 @@ fn get-wifi-status {
 
 # Turn wireless devices on/off.
 fn set-wifi-state [state]{
-  if (not (has-value ['on' 'off'] $state)) {
+  if (not (has-value [ 'on' 'off' ] $state)) {
     fail 'Invalid argument'
   }
   nmcli r wifi $state
@@ -41,16 +41,14 @@ fn set-wifi-state [state]{
 
 # Returns the first wireless device found.
 fn get-wifi-interface {
-  local:interface=''
-  for local:i [(nmcli d)] {
-    local:s = [(re:split '\s+' $i)]
+  local:interface = ''
+  for local:i [ (nmcli d) ] {
+    local:s = [ (re:split '\s+' $i) ]
     if (==s 'wifi' $s[1]) {
       interface = $s[0]
       break
     }
-  }
-  if (==s '' $interface) {
-    put $interface >&2
+  } else {
     fail 'no wifi interface'
   }
   put $interface
@@ -61,10 +59,12 @@ fn add-wifi-connection [ssid pass]{
   try {
     nmcli \
       d wifi \
-      connect $ssid $pass ifname (get-wifi-interface) \
+      connect $ssid $pass \
+      ifname (get-wifi-interface) \
       name $ssid
   } except e {
-    fail $e
+    put $e >&2
+    fail 'failed to add connection'
   }
 }
 
@@ -73,6 +73,7 @@ fn connect-wifi [ssid]{
   try {
     nmcli c up id $ssid
   } except e {
-    fail $e
+    put $e >&2
+    fail 'failed to connect'
   }
 }
