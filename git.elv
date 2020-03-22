@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-use github.com/chlorm/elvish-util-wrappers/regex
+use github.com/chlorm/elvish-stl/regex
 
 
 fn -parse-xy [line]{
