@@ -77,3 +77,4 @@ fn connect-wifi [ssid]{
     fail 'failed to connect'
   }
 }
+

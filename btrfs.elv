@@ -42,7 +42,6 @@ fn defrag [path &compression='zstd']{
   sudo:sudo 'btrfs' 'filesystem' 'defragment' '-v' '-r' '-c'$compression '-f' $path
 }
 
-
 fn scrub [mode path]{
   local:modes = [
     'cancel'
