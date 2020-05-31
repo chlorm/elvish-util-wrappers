@@ -27,7 +27,7 @@ fn -parse-xy [line]{
     &unstaged=[&]
   ]
 
-  # NOTE: X is purposely ommitted to throw an error.
+  # NOTE: X is purposely omitted to throw an error.
   for local:i [ staged unstaged ] {
     if (==s $xyr[$i] '.') {
       xy[$i][unmodifed]=$true
