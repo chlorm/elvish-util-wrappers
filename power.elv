@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+use str
 use github.com/chlorm/elvish-stl/io
 use github.com/chlorm/elvish-stl/path
 use github.com/chlorm/elvish-stl/regex
@@ -44,7 +45,7 @@ fn -parse-acpi {
     &batteries=[&]
   ]
   for local:i $acpi-output {
-    local:expld = [ (splits " " $i) ]
+    local:expld = [ (str:split " " $i) ]
     if (==s 'Adapter' $expld[0]) {
       local:num = (-num $expld[1])
       state = (-initialize-state $state adapters $num)

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+use str
 use github.com/chlorm/elvish-stl/regex
 
 
@@ -93,7 +94,7 @@ fn -map-modified [s]{
       &head=$s[6]
       &index=$s[7]
     ]
-    &path=(joins " " $s[8:])
+    &path=(str:join " " $s[8:])
   ]
 }
 
@@ -114,7 +115,7 @@ fn -parse-modified [status input]{
 }
 
 fn -map-renamed-copied [s]{
-  local:p = [(re:splits '\t' (joins " " $s[9:]))]
+  local:p = [(re:splits '\t' (str:join " " $s[9:]))]
   put [
     &type=$s[0]
     &xy=$s[1]
@@ -168,7 +169,7 @@ fn -map-unmerged [s]{
       &stage2=$s[8]
       &stage3=$s[9]
     ]
-    &path=(joins " " $s[10:])
+    &path=(str:join " " $s[10:])
   ]
 }
 
@@ -215,7 +216,7 @@ fn status {
   ]
 
   for local:i $git-status-output {
-    local:line = [(splits " " $i)]
+    local:line = [(str:split " " $i)]
     if (==s '#' $line[0]) {
       local:header = (regex:find 'branch.([a-z]+)' $line[1])
       if (==s 'ab' $header) {
@@ -237,11 +238,11 @@ fn status {
       git-status = (-initialize-path $git-status $input[path])
       git-status = (-parse-unmerged $git-status $input)
     } elif (==s '?' $line[0]) {
-      local:path = (joins " " $line[1:])
+      local:path = (str:join " " $line[1:])
       git-status = (-initialize-path $git-status $path)
       git-status[paths][$path][untracked]=$true
     } elif (==s '!' $line[0]) {
-      local:path = (joins " " $line[1:])
+      local:path = (str:join " " $line[1:])
       git-status = (-initialize-path $git-status $path)
       git-status[paths][$path][ignored]=$true
     } else {
