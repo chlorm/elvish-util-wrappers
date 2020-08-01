@@ -1,4 +1,4 @@
-# Copyright (c) 2019, Cody Opel <cwopel@chlorm.net>
+# Copyright (c) 2019-2020, Cody Opel <cwopel@chlorm.net>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 use github.com/chlorm/elvish-util-wrappers/sudo
 
 
-fn balance [mode path]{
+fn balance [mode path &dusage=$nil &musage=$nil]{
   local:modes = [
     'cancel'
     'pause'
@@ -26,8 +26,16 @@ fn balance [mode path]{
   ]
   has-value $modes $mode
   local:opts = [ ]
-  if (or (==s 'start' $mode) (==s 'status' $mode)) {
-    opts = ['-v']
+  if (or (==s $mode 'start') (==s $mode 'status')) {
+    opts = [ $opts '-v' ]
+  }
+  if (==s $mode 'start') {
+    if (not (==s $dusage $nil)) {
+      opts = [ $opts '-dusage='$dusage ]
+    }
+    if (not (==s $musage $nil)) {
+      opts = [ $opts '-musage='$musage ]
+    }
   }
   sudo:sudo 'btrfs' 'balance' $mode $@opts $path
 }
