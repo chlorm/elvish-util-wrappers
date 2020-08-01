@@ -66,7 +66,7 @@ fn -parse-sub [line]{
 
   if (==s 'S' $line[0:1]) {
     for local:i [ (keys $s) ] {
-      if (has-value ['C' 'M' 'U'] $s[$i]) {
+      if (has-value [ 'C' 'M' 'U' ] $s[$i]) {
         submodule[$i]=$true
       } else {
         if (!=s '.' $s[$i]) {
@@ -216,7 +216,7 @@ fn status {
   ]
 
   for local:i $git-status-output {
-    local:line = [(str:split " " $i)]
+    local:line = [ (str:split " " $i) ]
     if (==s '#' $line[0]) {
       local:header = (regex:find 'branch.([a-z]+)' $line[1])
       if (==s 'ab' $header) {
