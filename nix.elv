@@ -51,23 +51,23 @@ fn find-nixconfig-closures {
 }
 
 fn find-nixos-closures {
-  put [ (find '/nix/store' '-name' '*'(hostname)'*') ]
+  put [ (e:find '/nix/store' '-name' '*'(hostname)'*') ]
 }
 
 fn build-iso [platform]{
-  nix-build (nix-instantiate --eval -E '<nixpkgs>')'/nixos/release.nix' \
+  e:nix-build (e:nix-instantiate --eval -E '<nixpkgs>')'/nixos/release.nix' \
     '-A' 'iso_minimal_new_kernel.'$platform
 }
 
 fn copy-closures [target @closures]{
   for local:i $closures {
-    nix-copy-closure '--to' 'root@'$target $i
+    e:nix-copy-closure '--to' 'root@'$target $i
   }
 }
 
 fn install [@attrs]{
   for local:i $attrs {
-    nix-env '-iA' $i '-f' '<nixpkgs>'
+    e:nix-env '-iA' $i '-f' '<nixpkgs>'
   }
 }
 
@@ -75,7 +75,7 @@ fn rebuild-envs [@args]{
   local:exceptions = [ ]
   for local:i [ (-user-buildenvs) ] {
     try {
-      nix-env '-iA' $i '-f' '<nixpkgs>' $@args
+      e:nix-env '-iA' $i '-f' '<nixpkgs>' $@args
     } except e {
       exceptions = [$@exceptions $e]
       continue
@@ -92,7 +92,7 @@ fn remove-references [path]{
     fail 'Specified path does not exist: '$path
   }
 
-  for local:i [(find -L $path -xtype 1 -name "result*")] {
+  for local:i [ (e:find -L $path -xtype 1 -name "result*") ] {
     if (and (os:is-file $path'/.git/config') (!=s (io:cat $path'/.git/config' | grep 'triton') '')) {
       os:remove $path
     }
@@ -105,7 +105,7 @@ fn rebuild-system [target @args]{
 
 fn search [@attrs]{
   for local:i $attrs {
-    nix-env '-qaP' '.*'$i'.*' '-f' '<nixpkgs>'
+    e:nix-env '-qaP' '.*'$i'.*' '-f' '<nixpkgs>'
   }
 }
 

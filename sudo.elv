@@ -13,9 +13,12 @@
 # limitations under the License.
 
 
+use github.com/chlorm/elvish-stl/os
+
+
 fn sudo [@cmd]{
   # Don't use sudo if run as root
-  local:isRoot = (== (id -u) 0)
+  local:isRoot = (== (os:getuid) 0)
   local:hasDisplay = $false
   try {
     hasDisplay = (!=s (get-env DISPLAY) '')
@@ -23,7 +26,7 @@ fn sudo [@cmd]{
     hasDisplay = $false
   }
   if (and $hasDisplay ?(search-external gksudo) (not $isRoot)) {
-    gksudo $@cmd
+    e:gksudo $@cmd
   } elif (and ?(search-external sudo) (not $isRoot)) {
     e:sudo $@cmd
   } else {

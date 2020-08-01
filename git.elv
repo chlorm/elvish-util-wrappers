@@ -205,7 +205,7 @@ fn -initialize-path [status path]{
 fn status {
   local:git-status-output = []
   try {
-    git-status-output = [(git 'status' '--porcelain=2' '--branch' '--ignored')]
+    git-status-output = [ (e:git 'status' '--porcelain=2' '--branch' '--ignored') ]
   } except e {
     fail $e
   }

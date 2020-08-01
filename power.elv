@@ -31,7 +31,7 @@ fn -initialize-state [obj class num]{
 fn -parse-acpi {
   local:acpi-output = [ ]
   try {
-    acpi-output = [ (acpi -a -b) ]
+    acpi-output = [ (e:acpi -a -b) ]
   } except _ {
     fail
   }
