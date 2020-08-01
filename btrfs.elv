@@ -50,7 +50,7 @@ fn defrag [path &compression='zstd']{
   sudo:sudo 'btrfs' 'filesystem' 'defragment' '-v' '-r' '-c'$compression '-f' $path
 }
 
-fn scrub [mode path]{
+fn scrub [mode path &background=$false &ioprioclass=3 &ioprioclassdata=4]{
   local:modes = [
     'cancel'
     'resume'
@@ -59,8 +59,11 @@ fn scrub [mode path]{
   ]
   has-value $modes $mode
   local:opts = [ ]
-  if (or (==s 'resume' $mode) (==s 'restart' $mode)) {
-    opts = ['-c' '3']
+  if (or (==s $mode 'resume') (==s $mode 'start')) {
+    if (not $background) {
+      opts = [ $opts '-B']
+    }
+    opts = [ $opts '-d' '-c'$ioprioclass '-n'$ioprioclassdata ]
   }
   sudo:sudo 'btrfs' 'scrub' $mode $@opts $path
 }
