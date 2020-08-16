@@ -19,8 +19,8 @@ use github.com/chlorm/elvish-stl/regex
 
 fn -parse-xy [line]{
   local:xyr = [
-    &staged=$line[0:1]
-    &unstaged=$line[1:2]
+    &staged=$line[0..1]
+    &unstaged=$line[1..2]
   ]
 
   local:xy = [
@@ -57,14 +57,14 @@ fn -parse-xy [line]{
 
 fn -parse-sub [line]{
   local:s = [
-    &commit=$line[1:2]
-    &tracked=$line[2:3]
-    &untracked=$line[3:4]
+    &commit=$line[1..2]
+    &tracked=$line[2..3]
+    &untracked=$line[3..4]
   ]
 
   local:submodule = [&]
 
-  if (==s 'S' $line[0:1]) {
+  if (==s 'S' $line[0..1]) {
     for local:i [ (keys $s) ] {
       if (has-value [ 'C' 'M' 'U' ] $s[$i]) {
         submodule[$i]=$true
@@ -94,7 +94,7 @@ fn -map-modified [s]{
       &head=$s[6]
       &index=$s[7]
     ]
-    &path=(str:join " " $s[8:])
+    &path=(str:join " " $s[8..])
   ]
 }
 
@@ -169,7 +169,7 @@ fn -map-unmerged [s]{
       &stage2=$s[8]
       &stage3=$s[9]
     ]
-    &path=(str:join " " $s[10:])
+    &path=(str:join " " $s[10..])
   ]
 }
 
@@ -238,11 +238,11 @@ fn status {
       git-status = (-initialize-path $git-status $input[path])
       git-status = (-parse-unmerged $git-status $input)
     } elif (==s '?' $line[0]) {
-      local:path = (str:join " " $line[1:])
+      local:path = (str:join " " $line[1..])
       git-status = (-initialize-path $git-status $path)
       git-status[paths][$path][untracked]=$true
     } elif (==s '!' $line[0]) {
-      local:path = (str:join " " $line[1:])
+      local:path = (str:join " " $line[1..])
       git-status = (-initialize-path $git-status $path)
       git-status[paths][$path][ignored]=$true
     } else {
