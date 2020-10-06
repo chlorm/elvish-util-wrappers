@@ -16,11 +16,16 @@
 use github.com/chlorm/elvish-stl/regex
 
 
-fn set {
-    try {
-        local:d = (regex:find "'(.*)'" [ (e:dircolors -b) ][0])
-        set-env LS_COLORS $d
-    } except _ {
-        print 'command not found: dircolors' >&2
+fn get {
+    put (regex:find "'(.*)'" [ (e:dircolors -b) ][0])
+}
+
+fn set [&static=$nil]{
+    local:d = $nil
+    if (not (eq $static $nil)) {
+        d = $static
+    } else {
+        d = (regex:find "'(.*)'" [ (e:dircolors -b) ][0])
     }
+    set-env LS_COLORS $d
 }
