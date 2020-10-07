@@ -17,54 +17,55 @@ use github.com/chlorm/elvish-util-wrappers/sudo
 
 
 fn balance [mode path &dusage=$nil &musage=$nil]{
-  local:modes = [
-    'cancel'
-    'pause'
-    'resume'
-    'start'
-    'status'
-  ]
-  has-value $modes $mode
-  local:opts = [ ]
-  if (or (==s $mode 'start') (==s $mode 'status')) {
-    opts = [ $opts '-v' ]
-  }
-  if (==s $mode 'start') {
-    if (not (==s $dusage $nil)) {
-      opts = [ $opts '-dusage='$dusage ]
+    local:modes = [
+        'cancel'
+        'pause'
+        'resume'
+        'start'
+        'status'
+    ]
+    has-value $modes $mode
+    local:opts = [ ]
+    if (or (==s $mode 'start') (==s $mode 'status')) {
+        opts = [ $opts '-v' ]
     }
-    if (not (==s $musage $nil)) {
-      opts = [ $opts '-musage='$musage ]
+    if (==s $mode 'start') {
+        if (not (==s $dusage $nil)) {
+            opts = [ $opts '-dusage='$dusage ]
+        }
+        if (not (==s $musage $nil)) {
+            opts = [ $opts '-musage='$musage ]
+        }
     }
-  }
-  sudo:sudo 'btrfs' 'balance' $mode $@opts $path
+    sudo:sudo 'btrfs' 'balance' $mode $@opts $path
 }
 
 fn defrag [path &compression='zstd']{
-  local:compression-algorithms = [
-    'lzo'
-    'zlib'
-    'zstd'
-  ]
-  has-value $compression-algorithms $compression
-  sudo:sudo 'btrfs' 'filesystem' 'defragment' '-v' '-r' '-c'$compression '-f' $path
+    local:compression-algorithms = [
+        'lzo'
+        'zlib'
+        'zstd'
+    ]
+    has-value $compression-algorithms $compression
+    sudo:sudo 'btrfs' 'filesystem' ^
+        'defragment' '-v' '-r' '-c'$compression '-f' $path
 }
 
 fn scrub [mode path &background=$false &ioprioclass=3 &ioprioclassdata=4]{
-  local:modes = [
-    'cancel'
-    'resume'
-    'start'
-    'status'
-  ]
-  has-value $modes $mode
-  local:opts = [ ]
-  if (or (==s $mode 'resume') (==s $mode 'start')) {
-    if (not $background) {
-      opts = [ $opts '-B']
+    local:modes = [
+        'cancel'
+        'resume'
+        'start'
+        'status'
+    ]
+    has-value $modes $mode
+    local:opts = [ ]
+    if (or (==s $mode 'resume') (==s $mode 'start')) {
+        if (not $background) {
+            opts = [ $opts '-B' ]
+        }
+        opts = [ $opts '-d' '-c'$ioprioclass '-n'$ioprioclassdata ]
     }
-    opts = [ $opts '-d' '-c'$ioprioclass '-n'$ioprioclassdata ]
-  }
-  sudo:sudo 'btrfs' 'scrub' $mode $@opts $path
+    sudo:sudo 'btrfs' 'scrub' $mode $@opts $path
 }
 

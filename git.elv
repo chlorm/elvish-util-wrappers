@@ -18,239 +18,241 @@ use github.com/chlorm/elvish-stl/regex
 
 
 fn -parse-xy [line]{
-  local:xyr = [
-    &staged=$line[0..1]
-    &unstaged=$line[1..2]
-  ]
+    local:xyr = [
+        &staged=$line[0..1]
+        &unstaged=$line[1..2]
+    ]
 
-  local:xy = [
-    &staged=[&]
-    &unstaged=[&]
-  ]
+    local:xy = [
+        &staged=[&]
+        &unstaged=[&]
+    ]
 
-  # NOTE: X is purposely omitted to throw an error.
-  for local:i [ staged unstaged ] {
-    if (==s $xyr[$i] '.') {
-      xy[$i][unmodifed]=$true
-    } elif (==s $xyr[$i] 'A') {
-      xy[$i][added]=$true
-    } elif (==s $xyr[$i] 'C') {
-      xy[$i][copied]=$true
-    } elif (==s $xyr[$i] 'D') {
-      xy[$i][deleted]=$true
-    } elif (==s $xyr[$i] 'M') {
-      xy[$i][modified]=$true
-    } elif (==s $xyr[$i] 'R') {
-      xy[$i][renamed]=$true
-    } elif (==s $xyr[$i] 'T') {
-      xy[$i][typechange]=$true
-    } elif (==s $xyr[$i] 'U') {
-      xy[$i][unmerged]=$true
-    } else {
-      put $i' '$xyr[$i] >&2
-      fail 'not a valid XY char'
+    # NOTE: X is purposely omitted to throw an error.
+    for local:i [ staged unstaged ] {
+        if (==s $xyr[$i] '.') {
+            xy[$i][unmodifed]=$true
+        } elif (==s $xyr[$i] 'A') {
+            xy[$i][added]=$true
+        } elif (==s $xyr[$i] 'C') {
+            xy[$i][copied]=$true
+        } elif (==s $xyr[$i] 'D') {
+            xy[$i][deleted]=$true
+        } elif (==s $xyr[$i] 'M') {
+            xy[$i][modified]=$true
+        } elif (==s $xyr[$i] 'R') {
+            xy[$i][renamed]=$true
+        } elif (==s $xyr[$i] 'T') {
+            xy[$i][typechange]=$true
+        } elif (==s $xyr[$i] 'U') {
+            xy[$i][unmerged]=$true
+        } else {
+            put $i' '$xyr[$i] >&2
+            fail 'not a valid XY char'
+        }
     }
-  }
 
-  put $xy
+    put $xy
 }
 
 fn -parse-sub [line]{
-  local:s = [
-    &commit=$line[1..2]
-    &tracked=$line[2..3]
-    &untracked=$line[3..4]
-  ]
+    local:s = [
+        &commit=$line[1..2]
+        &tracked=$line[2..3]
+        &untracked=$line[3..4]
+    ]
 
-  local:submodule = [&]
+    local:submodule = [&]
 
-  if (==s 'S' $line[0..1]) {
-    for local:i [ (keys $s) ] {
-      if (has-value [ 'C' 'M' 'U' ] $s[$i]) {
-        submodule[$i]=$true
-      } else {
-        if (!=s '.' $s[$i]) {
-          put $s[$i] >&2
-          fail 'invalid submodule char'
+    if (==s 'S' $line[0..1]) {
+        for local:i [ (keys $s) ] {
+            if (has-value [ 'C' 'M' 'U' ] $s[$i]) {
+                submodule[$i]=$true
+            } else {
+                if (!=s '.' $s[$i]) {
+                put $s[$i] >&2
+                fail 'invalid submodule char'
+                }
+            }
         }
-      }
     }
-  }
 
-  put $submodule
+    put $submodule
 }
 
 fn -map-modified [s]{
-  put [
-    &type=$s[0]
-    &xy=$s[1]
-    &sub=$s[2]
-    &mode=[
-      &head=$s[3]
-      &index=$s[4]
-      &worktree=$s[5]
+    put [
+        &type=$s[0]
+        &xy=$s[1]
+        &sub=$s[2]
+        &mode=[
+            &head=$s[3]
+            &index=$s[4]
+            &worktree=$s[5]
+        ]
+        &obj=[
+            &head=$s[6]
+            &index=$s[7]
+        ]
+        &path=(str:join " " $s[8..])
     ]
-    &obj=[
-      &head=$s[6]
-      &index=$s[7]
-    ]
-    &path=(str:join " " $s[8..])
-  ]
 }
 
 fn -parse-modified [status input]{
-  local:path = $input[path]
-  local:xy = (-parse-xy $input[xy])
-  local:sub = (-parse-sub $input[sub])
+    local:path = $input[path]
+    local:xy = (-parse-xy $input[xy])
+    local:sub = (-parse-sub $input[sub])
 
-  status[paths][$path][staged]=$xy[staged]
-  status[paths][$path][unstaged]=$xy[unstaged]
-  if (> (count $sub) 0) {
-    status[paths][$path][submodule]=$sub
-  }
-  status[paths][$path][mode]=$input[mode]
-  status[paths][$path][object]=$input[obj]
+    status[paths][$path][staged]=$xy[staged]
+    status[paths][$path][unstaged]=$xy[unstaged]
+    if (> (count $sub) 0) {
+        status[paths][$path][submodule]=$sub
+    }
+    status[paths][$path][mode]=$input[mode]
+    status[paths][$path][object]=$input[obj]
 
-  put $status
+    put $status
 }
 
 fn -map-renamed-copied [s]{
-  local:p = [(re:splits '\t' (str:join " " $s[9:]))]
-  put [
-    &type=$s[0]
-    &xy=$s[1]
-    &sub=$s[2]
-    &mode=[
-      &head=$s[3]
-      &index=$s[4]
-      &worktree=$s[5]
+    local:p = [(re:splits '\t' (str:join " " $s[9..]))]
+    put [
+        &type=$s[0]
+        &xy=$s[1]
+        &sub=$s[2]
+        &mode=[
+            &head=$s[3]
+            &index=$s[4]
+            &worktree=$s[5]
+        ]
+        &obj=[
+            &head=$s[6]
+            &index=$s[7]
+        ]
+        &score=$s[8]
+        &path=$p[0]
+        &origpath=$p[1]
     ]
-    &obj=[
-      &head=$s[6]
-      &index=$s[7]
-    ]
-    &score=$s[8]
-    &path=$p[0]
-    &origpath=$p[1]
-  ]
 }
 
 fn -parse-rename-copied [status input]{
-  local:path = $input[path]
-  local:xy = (-parse-xy $input[xy])
-  local:sub = (-parse-sub $input[sub])
+    local:path = $input[path]
+    local:xy = (-parse-xy $input[xy])
+    local:sub = (-parse-sub $input[sub])
 
-  status[paths][$path][staged]=$xy[staged]
-  status[paths][$path][unstaged]=$xy[unstaged]
-  if (> (count $sub) 0) {
-    status[paths][$path][submodule]=$sub
-  }
-  status[paths][$path][mode]=$input[mode]
-  status[paths][$path][object]=$input[obj]
-  status[paths][$path][score]=$input[score]
-  status[paths][$path][origpath]=$input[origpath]
+    status[paths][$path][staged]=$xy[staged]
+    status[paths][$path][unstaged]=$xy[unstaged]
+    if (> (count $sub) 0) {
+        status[paths][$path][submodule]=$sub
+    }
+    status[paths][$path][mode]=$input[mode]
+    status[paths][$path][object]=$input[obj]
+    status[paths][$path][score]=$input[score]
+    status[paths][$path][origpath]=$input[origpath]
 
-  put $status
+    put $status
 }
 
 fn -map-unmerged [s]{
-  put [
-    &type=$s[0]
-    &xy=$s[1]
-    &sub=$s[2]
-    &mode=[
-      &stage1=$s[3]
-      &stage2=$s[4]
-      &stage3=$s[5]
-      &worktree=$s[6]
+    put [
+        &type=$s[0]
+        &xy=$s[1]
+        &sub=$s[2]
+        &mode=[
+            &stage1=$s[3]
+            &stage2=$s[4]
+            &stage3=$s[5]
+            &worktree=$s[6]
+        ]
+        &obj=[
+            &stage1=$s[7]
+            &stage2=$s[8]
+            &stage3=$s[9]
+        ]
+        &path=(str:join " " $s[10..])
     ]
-    &obj=[
-      &stage1=$s[7]
-      &stage2=$s[8]
-      &stage3=$s[9]
-    ]
-    &path=(str:join " " $s[10..])
-  ]
 }
 
 fn -parse-unmerged [status input]{
-  local:path = $input[path]
-  local:xy = (-parse-xy $input[xy])
-  local:sub = (-parse-sub $input[sub])
+    local:path = $input[path]
+    local:xy = (-parse-xy $input[xy])
+    local:sub = (-parse-sub $input[sub])
 
-  status[paths][$path][staged]=$xy[staged]
-  status[paths][$path][unstaged]=$xy[unstaged]
-  if (> (count $sub) 0) {
-    status[paths][$path][submodule]=$sub
-  }
-  status[paths][$path][mode]=$input[mode]
-  status[paths][$path][object]=$input[obj]
+    status[paths][$path][staged]=$xy[staged]
+    status[paths][$path][unstaged]=$xy[unstaged]
+    if (> (count $sub) 0) {
+        status[paths][$path][submodule]=$sub
+    }
+    status[paths][$path][mode]=$input[mode]
+    status[paths][$path][object]=$input[obj]
 
-  put $status
+    put $status
 }
 
 # Initializes a path object if it doesn't exist
 fn -initialize-path [status path]{
-  try {
-    local:test = $status[paths][$path]
-  } except _ {
-    status[paths][$path]=[&]
-  }
+    try {
+        local:test = $status[paths][$path]
+    } except _ {
+        status[paths][$path]=[&]
+    }
 
-  put $status
+    put $status
 }
 
 # Returns the result of `git status` as a structured object.
 # XXX: object structure and naming is not finalized and subject to change
 fn status {
-  local:git-status-output = []
-  try {
-    git-status-output = [ (e:git 'status' '--porcelain=2' '--branch' '--ignored') ]
-  } except e {
-    fail $e
-  }
-
-  local:git-status = [
-    &branch=[&]
-    &paths=[&]
-  ]
-
-  for local:i $git-status-output {
-    local:line = [ (str:split " " $i) ]
-    if (==s '#' $line[0]) {
-      local:header = (regex:find 'branch.([a-z]+)' $line[1])
-      if (==s 'ab' $header) {
-        git-status[branch][ahead]=(regex:find '\+(\d+)' $line[2])
-        git-status[branch][behind]=(regex:find '-(\d+)' $line[3])
-      } else {
-        git-status[branch][$header]=$line[2]
-      }
-    } elif (==s '1' $line[0]) {
-      local:input = (-map-modified $line)
-      git-status = (-initialize-path $git-status $input[path])
-      git-status = (-parse-modified $git-status $input)
-    } elif (==s '2' $line[0]) {
-      local:input = (-map-modified $line)
-      git-status = (-initialize-path $git-status $input[path])
-      git-status = (-parse-renamed-copied $git-status $input)
-    } elif (==s 'u' $line[0]) {
-      local:input = (-map-modified $line)
-      git-status = (-initialize-path $git-status $input[path])
-      git-status = (-parse-unmerged $git-status $input)
-    } elif (==s '?' $line[0]) {
-      local:path = (str:join " " $line[1..])
-      git-status = (-initialize-path $git-status $path)
-      git-status[paths][$path][untracked]=$true
-    } elif (==s '!' $line[0]) {
-      local:path = (str:join " " $line[1..])
-      git-status = (-initialize-path $git-status $path)
-      git-status[paths][$path][ignored]=$true
-    } else {
-      put $line[0] >&2
-      fail 'invalid type'
+    local:git-status-output = []
+    try {
+        git-status-output = [
+            (e:git 'status' '--porcelain=2' '--branch' '--ignored')
+        ]
+    } except e {
+        fail $e
     }
-  }
 
-  put $git-status
+    local:git-status = [
+        &branch=[&]
+        &paths=[&]
+    ]
+
+    for local:i $git-status-output {
+        local:line = [ (str:split " " $i) ]
+        if (==s '#' $line[0]) {
+            local:header = (regex:find 'branch.([a-z]+)' $line[1])
+            if (==s 'ab' $header) {
+                git-status[branch][ahead]=(regex:find '\+(\d+)' $line[2])
+                git-status[branch][behind]=(regex:find '-(\d+)' $line[3])
+            } else {
+                git-status[branch][$header]=$line[2]
+            }
+        } elif (==s '1' $line[0]) {
+            local:input = (-map-modified $line)
+            git-status = (-initialize-path $git-status $input[path])
+            git-status = (-parse-modified $git-status $input)
+        } elif (==s '2' $line[0]) {
+            local:input = (-map-modified $line)
+            git-status = (-initialize-path $git-status $input[path])
+            git-status = (-parse-renamed-copied $git-status $input)
+        } elif (==s 'u' $line[0]) {
+            local:input = (-map-modified $line)
+            git-status = (-initialize-path $git-status $input[path])
+            git-status = (-parse-unmerged $git-status $input)
+        } elif (==s '?' $line[0]) {
+            local:path = (str:join " " $line[1..])
+            git-status = (-initialize-path $git-status $path)
+            git-status[paths][$path][untracked]=$true
+        } elif (==s '!' $line[0]) {
+            local:path = (str:join " " $line[1..])
+            git-status = (-initialize-path $git-status $path)
+            git-status[paths][$path][ignored]=$true
+        } else {
+            put $line[0] >&2
+            fail 'invalid type'
+        }
+    }
+
+    put $git-status
 }
 

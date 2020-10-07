@@ -21,91 +21,93 @@ use github.com/chlorm/elvish-util-wrappers/sudo
 
 # Clear environment variables in user environment polluted by makeWrapper.
 fn clear-env {
-  unset-env GDK_PIXBUF_MODULE_FILE
-  unset-env GI_TYPELIB_PATH
-  unset-env GIO_EXTRA_MODULES
-  unset-env GRL_PLUGIN_PATH
-  unset-env GST_PLUGIN_SYSTEM_PATH_1_0
-  unset-env GSETTINGS_SCHEMAS_PATH
-  unset-env XDG_DATA_DIRS
-  unset-env XDG_ICON_DIRS
+    unset-env GDK_PIXBUF_MODULE_FILE
+    unset-env GI_TYPELIB_PATH
+    unset-env GIO_EXTRA_MODULES
+    unset-env GRL_PLUGIN_PATH
+    unset-env GST_PLUGIN_SYSTEM_PATH_1_0
+    unset-env GSETTINGS_SCHEMAS_PATH
+    unset-env XDG_DATA_DIRS
+    unset-env XDG_ICON_DIRS
 }
 
 fn -user-buildenvs {
-  local:envs = [ ]
-  for local:line [ (io:cat (get-env HOME)'/.nixpkgs/config.nix') ] {
-    local:m = (regex:find '([0-9a-zA-Z_-]+)(?:[ ]+|)=.*buildEnv)' $line)
-    if (!=s '' $m) {
-      envs = [ $@envs $m ]
+    local:envs = [ ]
+    for local:line [ (io:cat (get-env HOME)'/.nixpkgs/config.nix') ] {
+        local:m = (regex:find '([0-9a-zA-Z_-]+)(?:[ ]+|)=.*buildEnv)' $line)
+        if (!=s '' $m) {
+            envs = [ $@envs $m ]
+        }
     }
-  }
-  put $envs
+    put $envs
 }
 
 fn find-nixconfig-closures {
-  local:closures = [ ]
-  for local:i [ (-user-buildenvs) ] {
-    closures = [ $@closures (find '/nix/store' '-name' '*'$i'*') ]
-  }
-  put $closures
+    local:closures = [ ]
+    for local:i [ (-user-buildenvs) ] {
+        closures = [ $@closures (find '/nix/store' '-name' '*'$i'*') ]
+    }
+    put $closures
 }
 
 fn find-nixos-closures {
-  put [ (e:find '/nix/store' '-name' '*'(hostname)'*') ]
+    put [ (e:find '/nix/store' '-name' '*'(hostname)'*') ]
 }
 
 fn build-iso [platform]{
-  e:nix-build (e:nix-instantiate --eval -E '<nixpkgs>')'/nixos/release.nix' \
-    '-A' 'iso_minimal_new_kernel.'$platform
+    e:nix-build (e:nix-instantiate --eval -E '<nixpkgs>')'/nixos/release.nix' ^
+        '-A' 'iso_minimal_new_kernel.'$platform
 }
 
 fn copy-closures [target @closures]{
-  for local:i $closures {
-    e:nix-copy-closure '--to' 'root@'$target $i
-  }
+    for local:i $closures {
+        e:nix-copy-closure '--to' 'root@'$target $i
+    }
 }
 
 fn install [@attrs]{
-  for local:i $attrs {
-    e:nix-env '-iA' $i '-f' '<nixpkgs>'
-  }
+    for local:i $attrs {
+        e:nix-env '-iA' $i '-f' '<nixpkgs>'
+    }
 }
 
 fn rebuild-envs [@args]{
-  local:exceptions = [ ]
-  for local:i [ (-user-buildenvs) ] {
-    try {
-      e:nix-env '-iA' $i '-f' '<nixpkgs>' $@args
-    } except e {
-      exceptions = [$@exceptions $e]
-      continue
+    local:exceptions = [ ]
+    for local:i [ (-user-buildenvs) ] {
+        try {
+            e:nix-env '-iA' $i '-f' '<nixpkgs>' $@args
+        } except e {
+            exceptions = [$@exceptions $e]
+            continue
+        }
     }
-  }
 
-  for local:x $exceptions {
-    echo $x
-  }
+    for local:x $exceptions {
+        echo $x
+    }
 }
 
 fn remove-references [path]{
-  if (not (os:is-dir $path)) {
-    fail 'Specified path does not exist: '$path
-  }
-
-  for local:i [ (e:find -L $path -xtype 1 -name "result*") ] {
-    if (and (os:is-file $path'/.git/config') (!=s (io:cat $path'/.git/config' | grep 'triton') '')) {
-      os:remove $path
+    if (not (os:is-dir $path)) {
+        fail 'Specified path does not exist: '$path
     }
-  }
+
+    for local:i [ (e:find -L $path -xtype 1 -name "result*") ] {
+        if (and (os:is-file $path'/.git/config') ^
+                (!=s (io:cat $path'/.git/config' | grep 'triton') '')) {
+            os:remove $path
+        }
+    }
 }
 
 fn rebuild-system [target @args]{
-  sudo:sudo nixos-rebuild $target $@args -I 'nixpkgs='(nix-instantiate --eval -E '<nixpkgs>')
+    sudo:sudo nixos-rebuild $target $@args ^
+        -I 'nixpkgs='(nix-instantiate --eval -E '<nixpkgs>')
 }
 
 fn search [@attrs]{
-  for local:i $attrs {
-    e:nix-env '-qaP' '.*'$i'.*' '-f' '<nixpkgs>'
-  }
+    for local:i $attrs {
+        e:nix-env '-qaP' '.*'$i'.*' '-f' '<nixpkgs>'
+    }
 }
 
