@@ -18,17 +18,17 @@ use re
 
 # Find connectable wifi ssids.
 fn get-wifi-list {
-  put (e:nmcli d wifi list)
+  put (e:nmcli device wifi list)
 }
 
 # List saved connection.
 fn get-wifi-connections {
-  put (e:nmcli c)
+  put (e:nmcli connection)
 }
 
 # List active connections.
 fn get-wifi-status {
-  put (e:nmcli g status)
+  put (e:nmcli general status)
 }
 
 # Turn wireless devices on/off.
@@ -36,13 +36,13 @@ fn set-wifi-state [state]{
   if (not (has-value [ 'on' 'off' ] $state)) {
     fail 'Invalid argument'
   }
-  e:nmcli r wifi $state
+  e:nmcli radio wifi $state
 }
 
 # Returns the first wireless device found.
 fn get-wifi-interface {
   local:interface = ''
-  for local:i [ (e:nmcli d) ] {
+  for local:i [ (e:nmcli device) ] {
     local:s = [ (re:split '\s+' $i) ]
     if (==s 'wifi' $s[1]) {
       interface = $s[0]
@@ -57,7 +57,7 @@ fn get-wifi-interface {
 # Add a new connection.
 fn add-wifi-connection [ssid pass]{
   e:nmcli ^
-    d wifi ^
+    device wifi ^
     connect $ssid $pass ^
     ifname (get-wifi-interface) ^
     name $ssid
@@ -65,6 +65,6 @@ fn add-wifi-connection [ssid pass]{
 
 # Connect to a saved connection.
 fn set-wifi-connection [ssid]{
-  e:nmcli c up id $ssid
+  e:nmcli connection up id $ssid
 }
 
