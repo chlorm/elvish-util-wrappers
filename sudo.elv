@@ -18,8 +18,8 @@ use github.com/chlorm/elvish-stl/os
 
 fn sudo [@cmd]{
     # Don't use sudo if run as root
-    local:isRoot = (== (os:getuid) 0)
-    local:hasDisplay = $false
+    isRoot = (== (os:getuid) 0)
+    hasDisplay = $false
     try {
         hasDisplay = (!=s (get-env DISPLAY) '')
     } except _ {

@@ -32,10 +32,10 @@ fn clear-env {
 }
 
 fn -user-buildenvs {
-    local:envs = [ ]
-    for local:line [ (io:cat (get-env HOME)'/.nixpkgs/config.nix') ] {
-        local:m = (regex:find '([0-9a-zA-Z_-]+)(?:[ ]+|)=.*buildEnv)' $line)
-        if (!=s '' $m) {
+    envs = [ ]
+    for line [ (io:cat (get-env HOME)'/.nixpkgs/config.nix') ] {
+        m = (regex:find '([0-9a-zA-Z_-]+)(?:[ ]+|)=.*buildEnv)' $line)
+        if (!=s $m '') {
             envs = [ $@envs $m ]
         }
     }
@@ -43,8 +43,8 @@ fn -user-buildenvs {
 }
 
 fn find-nixconfig-closures {
-    local:closures = [ ]
-    for local:i [ (-user-buildenvs) ] {
+    closures = [ ]
+    for i [ (-user-buildenvs) ] {
         closures = [ $@closures (find '/nix/store' '-name' '*'$i'*') ]
     }
     put $closures
@@ -60,30 +60,30 @@ fn build-iso [platform]{
 }
 
 fn copy-closures [target @closures]{
-    for local:i $closures {
+    for i $closures {
         e:nix-copy-closure '--to' 'root@'$target $i
     }
 }
 
 fn install [@attrs]{
-    for local:i $attrs {
+    for i $attrs {
         e:nix-env '-iA' $i '-f' '<nixpkgs>'
     }
 }
 
 fn rebuild-envs [@args]{
-    local:exceptions = [ ]
-    for local:i [ (-user-buildenvs) ] {
+    exceptions = [ ]
+    for i [ (-user-buildenvs) ] {
         try {
             e:nix-env '-iA' $i '-f' '<nixpkgs>' $@args
         } except e {
-            exceptions = [$@exceptions $e]
+            exceptions = [ $@exceptions $e ]
             continue
         }
     }
 
-    for local:x $exceptions {
-        echo $x
+    for i $exceptions {
+        echo $i
     }
 }
 
@@ -92,7 +92,7 @@ fn remove-references [path]{
         fail 'Specified path does not exist: '$path
     }
 
-    for local:i [ (e:find -L $path -xtype 1 -name "result*") ] {
+    for i [ (e:find -L $path -xtype 1 -name "result*") ] {
         if (and (os:is-file $path'/.git/config') ^
                 (!=s (io:cat $path'/.git/config' | grep 'triton') '')) {
             os:remove $path
@@ -106,7 +106,7 @@ fn rebuild-system [target @args]{
 }
 
 fn search [@attrs]{
-    for local:i $attrs {
+    for i $attrs {
         e:nix-env '-qaP' '.*'$i'.*' '-f' '<nixpkgs>'
     }
 }

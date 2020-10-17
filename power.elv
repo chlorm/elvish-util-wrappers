@@ -21,7 +21,7 @@ use github.com/chlorm/elvish-stl/regex
 
 fn -initialize-state [obj class num]{
     try {
-        local:test = $obj[$class][$num]
+        _ = $obj[$class][$num]
     } except _ {
         obj[$class][$num]=[&]
     }
@@ -29,9 +29,9 @@ fn -initialize-state [obj class num]{
 }
 
 fn -parse-acpi {
-    local:acpi-output = [ ]
+    acpiOutput = [ ]
     try {
-        acpi-output = [ (e:acpi -a -b) ]
+        acpiOutput = [ (e:acpi -a -b) ]
     } except _ {
         fail
     }
@@ -40,21 +40,21 @@ fn -parse-acpi {
         put (regex:find '(\d+):' $n)
     }
 
-    local:state = [
+    state = [
         &adapters=[&]
         &batteries=[&]
     ]
-    for local:i $acpi-output {
-        local:expld = [ (str:split " " $i) ]
+    for i $acpiOutput {
+        expld = [ (str:split " " $i) ]
         if (==s 'Adapter' $expld[0]) {
-            local:num = (-num $expld[1])
+            num = (-num $expld[1])
             state = (-initialize-state $state adapters $num)
-            state[adapters][$num][status]=$expld[2]
+            state[adapters][$num][status] = $expld[2]
         } elif (==s 'Battery' $expld[0]) {
-            local:num = (-num $expld[1])
+            num = (-num $expld[1])
             state = (-initialize-state $state batteries $num)
-            state[batteries][$num][status]=(regex:find '(.*),' $expld[2])
-            state[batteries][$num][charge]=(regex:find '(\d+)%' $expld[3])
+            state[batteries][$num][status] = (regex:find '(.*),' $expld[2])
+            state[batteries][$num][charge] = (regex:find '(\d+)%' $expld[3])
         } else {
             put $expld[0] >&2
             fail 'invalid type'
@@ -77,20 +77,20 @@ fn -parse-sysfs {
         &adapters=[&]
         &batteries=[&]
     ]
-    for local:dev (path:scandir $sysfs)[files] {
-        if (==s 'AC' (path:basename $dev)[0..2]) {
-            local:num = (-sys-uid $dev)
+    for dev (path:scandir $sysfs)[files] {
+        if (==s (path:basename $dev)[0..2] 'AC') {
+            num = (-sys-uid $dev)
             state = (-initialize-state $state adapters $num)
-            local:status = off-line
-            if (== 1 [ (io:cat $dev'/online') ][0]) {
-                status = on-line
+            status = 'off-line'
+            if (== [ (io:cat $dev'/online') ][0] 1) {
+                status = 'on-line'
             }
-            state[adapters][$num][status]=$status
-        } elif (==s 'BAT' (path:basename $dev)[0..3]) {
-            local:num = (-sys-uid $dev)
+            state[adapters][$num][status] = $status
+        } elif (==s (path:basename $dev)[0..3] 'BAT') {
+            num = (-sys-uid $dev)
             state = (-initialize-state $state batteries $num)
-            state[batteries][$num][status]=(io:cat $dev'/status')
-            state[batteries][$num][charge]=(io:cat $dev'/capacity')
+            state[batteries][$num][status] = (io:cat $dev'/status')
+            state[batteries][$num][charge] = (io:cat $dev'/capacity')
         } else {
             put $dev >&2
             fail 'invalid type'

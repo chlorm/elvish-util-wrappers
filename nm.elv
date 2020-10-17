@@ -41,10 +41,10 @@ fn set-wifi-state [state]{
 
 # Returns the first wireless device found.
 fn get-wifi-interface {
-    local:interface = ''
-    for local:i [ (e:nmcli device) ] {
-        local:s = [ (re:split '\s+' $i) ]
-        if (==s 'wifi' $s[1]) {
+    interface = ''
+    for i [ (e:nmcli device) ] {
+        s = [ (re:split '\s+' $i) ]
+        if (==s $s[1] 'wifi') {
             interface = $s[0]
             break
         }

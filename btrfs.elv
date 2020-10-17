@@ -17,7 +17,7 @@ use github.com/chlorm/elvish-util-wrappers/sudo
 
 
 fn balance [mode path &dusage=$nil &musage=$nil]{
-    local:modes = [
+    modes = [
         'cancel'
         'pause'
         'resume'
@@ -25,7 +25,7 @@ fn balance [mode path &dusage=$nil &musage=$nil]{
         'status'
     ]
     has-value $modes $mode
-    local:opts = [ ]
+    opts = [ ]
     if (or (==s $mode 'start') (==s $mode 'status')) {
         opts = [ $opts '-v' ]
     }
@@ -41,25 +41,25 @@ fn balance [mode path &dusage=$nil &musage=$nil]{
 }
 
 fn defrag [path &compression='zstd']{
-    local:compression-algorithms = [
+    compressionAlgorithms = [
         'lzo'
         'zlib'
         'zstd'
     ]
-    has-value $compression-algorithms $compression
+    has-value $compressionAlgorithms $compression
     sudo:sudo 'btrfs' 'filesystem' ^
         'defragment' '-v' '-r' '-c'$compression '-f' $path
 }
 
 fn scrub [mode path &background=$false &ioprioclass=3 &ioprioclassdata=4]{
-    local:modes = [
+    modes = [
         'cancel'
         'resume'
         'start'
         'status'
     ]
     has-value $modes $mode
-    local:opts = [ ]
+    opts = [ ]
     if (or (==s $mode 'resume') (==s $mode 'start')) {
         if (not $background) {
             opts = [ $opts '-B' ]
