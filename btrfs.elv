@@ -68,4 +68,3 @@ fn scrub [mode path &background=$false &ioprioclass=3 &ioprioclassdata=4]{
     }
     sudo:sudo 'btrfs' 'scrub' $mode $@opts $path
 }
-
