@@ -27,14 +27,14 @@ fn balance [mode path &dusage=$nil &musage=$nil]{
     has-value $modes $mode
     opts = [ ]
     if (or (==s $mode 'start') (==s $mode 'status')) {
-        opts = [ $opts '-v' ]
+        opts = [ $@opts '-v' ]
     }
     if (==s $mode 'start') {
         if (not (==s $dusage $nil)) {
-            opts = [ $opts '-dusage='$dusage ]
+            opts = [ $@opts '-dusage='$dusage ]
         }
         if (not (==s $musage $nil)) {
-            opts = [ $opts '-musage='$musage ]
+            opts = [ $@opts '-musage='$musage ]
         }
     }
     sudo:sudo 'btrfs' 'balance' $mode $@opts $path
@@ -62,9 +62,9 @@ fn scrub [mode path &background=$false &ioprioclass=3 &ioprioclassdata=4]{
     opts = [ ]
     if (or (==s $mode 'resume') (==s $mode 'start')) {
         if (not $background) {
-            opts = [ $opts '-B' ]
+            opts = [ $@opts '-B' ]
         }
-        opts = [ $opts '-d' '-c'$ioprioclass '-n'$ioprioclassdata ]
+        opts = [ $@opts '-d' '-c'$ioprioclass '-n'$ioprioclassdata ]
     }
     sudo:sudo 'btrfs' 'scrub' $mode $@opts $path
 }
