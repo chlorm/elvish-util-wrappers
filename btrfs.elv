@@ -30,10 +30,10 @@ fn balance [mode path &dusage=$nil &musage=$nil]{
         opts = [ $@opts '-v' ]
     }
     if (==s $mode 'start') {
-        if (not (==s $dusage $nil)) {
+        if (not (eq $dusage $nil)) {
             opts = [ $@opts '-dusage='$dusage ]
         }
-        if (not (==s $musage $nil)) {
+        if (not (eq $musage $nil)) {
             opts = [ $@opts '-musage='$musage ]
         }
     }
