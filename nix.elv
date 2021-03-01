@@ -32,20 +32,20 @@ fn clear-env {
 }
 
 fn -user-buildenvs {
-    envs = [ ]
+    var envs = [ ]
     for line [ (io:cat (get-env HOME)'/.nixpkgs/config.nix') ] {
-        m = (regex:find '([0-9a-zA-Z_-]+)(?:[ ]+|)=.*buildEnv)' $line)
+        var m = (regex:find '([0-9a-zA-Z_-]+)(?:[ ]+|)=.*buildEnv)' $line)
         if (!=s $m '') {
-            envs = [ $@envs $m ]
+            set envs = [ $@envs $m ]
         }
     }
     put $envs
 }
 
 fn find-nixconfig-closures {
-    closures = [ ]
+    var closures = [ ]
     for i [ (-user-buildenvs) ] {
-        closures = [ $@closures (find '/nix/store' '-name' '*'$i'*') ]
+        set closures = [ $@closures (find '/nix/store' '-name' '*'$i'*') ]
     }
     put $closures
 }
@@ -72,12 +72,12 @@ fn install [@attrs]{
 }
 
 fn rebuild-envs [@args]{
-    exceptions = [ ]
+    var exceptions = [ ]
     for i [ (-user-buildenvs) ] {
         try {
             e:nix-env '-iA' $i '-f' '<nixpkgs>' $@args
         } except e {
-            exceptions = [ $@exceptions $e ]
+            set exceptions = [ $@exceptions $e ]
             continue
         }
     }

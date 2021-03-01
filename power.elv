@@ -21,17 +21,17 @@ use github.com/chlorm/elvish-stl/regex
 
 fn -initialize-state [obj class num]{
     try {
-        _ = $obj[$class][$num]
+        var _ = $obj[$class][$num]
     } except _ {
-        obj[$class][$num]=[&]
+        set obj[$class][$num]=[&]
     }
     put $obj
 }
 
 fn -parse-acpi {
-    acpiOutput = [ ]
+    var acpiOutput = [ ]
     try {
-        acpiOutput = [ (e:acpi -a -b) ]
+        set acpiOutput = [ (e:acpi -a -b) ]
     } except _ {
         fail
     }
@@ -40,21 +40,21 @@ fn -parse-acpi {
         put (regex:find '(\d+):' $n)
     }
 
-    state = [
+    var state = [
         &adapters=[&]
         &batteries=[&]
     ]
     for i $acpiOutput {
-        expld = [ (str:split " " $i) ]
+        var expld = [ (str:split " " $i) ]
         if (==s 'Adapter' $expld[0]) {
-            num = (-num $expld[1])
-            state = (-initialize-state $state adapters $num)
-            state[adapters][$num][status] = $expld[2]
+            var num = (-num $expld[1])
+            set state = (-initialize-state $state adapters $num)
+            set state[adapters][$num][status] = $expld[2]
         } elif (==s 'Battery' $expld[0]) {
-            num = (-num $expld[1])
-            state = (-initialize-state $state batteries $num)
-            state[batteries][$num][status] = (regex:find '(.*),' $expld[2])
-            state[batteries][$num][charge] = (regex:find '(\d+)%' $expld[3])
+            var num = (-num $expld[1])
+            set state = (-initialize-state $state batteries $num)
+            set state[batteries][$num][status] = (regex:find '(.*),' $expld[2])
+            set state[batteries][$num][charge] = (regex:find '(\d+)%' $expld[3])
         } else {
             put $expld[0] >&2
             fail 'invalid type'
@@ -69,28 +69,28 @@ fn -sys-uid [dev]{
 }
 
 fn -parse-sysfs {
-    local:sysfs = $E:ROOT'/sys/class/power_supply'
+    var local:sysfs = $E:ROOT'/sys/class/power_supply'
     if (not (os:exists $sysfs)) {
         fail 'cannot access sysfs'
     }
-    local:state = [
+    var local:state = [
         &adapters=[&]
         &batteries=[&]
     ]
     for dev (path:scandir $sysfs)[files] {
         if (==s (path:basename $dev)[0..2] 'AC') {
-            num = (-sys-uid $dev)
-            state = (-initialize-state $state adapters $num)
-            status = 'off-line'
+            var num = (-sys-uid $dev)
+            set state = (-initialize-state $state adapters $num)
+            var status = 'off-line'
             if (== [ (io:cat $dev'/online') ][0] 1) {
-                status = 'on-line'
+                set status = 'on-line'
             }
-            state[adapters][$num][status] = $status
+            set state[adapters][$num][status] = $status
         } elif (==s (path:basename $dev)[0..3] 'BAT') {
-            num = (-sys-uid $dev)
-            state = (-initialize-state $state batteries $num)
-            state[batteries][$num][status] = (io:cat $dev'/status')
-            state[batteries][$num][charge] = (io:cat $dev'/capacity')
+            var num = (-sys-uid $dev)
+            set state = (-initialize-state $state batteries $num)
+            set state[batteries][$num][status] = (io:cat $dev'/status')
+            set state[batteries][$num][charge] = (io:cat $dev'/capacity')
         } else {
             put $dev >&2
             fail 'invalid type'
