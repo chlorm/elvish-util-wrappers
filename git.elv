@@ -29,23 +29,23 @@ fn -parse-xy [line]{
     ]
 
     # NOTE: X is purposely omitted to throw an error.
-    for i [ staged unstaged ] {
+    for i [ 'staged' 'unstaged' ] {
         if (==s $xyr[$i] '.') {
-            set xy[$i][unmodifed] = $true
+            set xy[$i]['unmodifed'] = $true
         } elif (==s $xyr[$i] 'A') {
-            set xy[$i][added] = $true
+            set xy[$i]['added'] = $true
         } elif (==s $xyr[$i] 'C') {
-            set xy[$i][copied] = $true
+            set xy[$i]['copied'] = $true
         } elif (==s $xyr[$i] 'D') {
-            set xy[$i][deleted] = $true
+            set xy[$i]['deleted'] = $true
         } elif (==s $xyr[$i] 'M') {
-            set xy[$i][modified] = $true
+            set xy[$i]['modified'] = $true
         } elif (==s $xyr[$i] 'R') {
-            set xy[$i][renamed] = $true
+            set xy[$i]['renamed'] = $true
         } elif (==s $xyr[$i] 'T') {
-            set xy[$i][typechange] = $true
+            set xy[$i]['typechange'] = $true
         } elif (==s $xyr[$i] 'U') {
-            set xy[$i][unmerged] = $true
+            set xy[$i]['unmerged'] = $true
         } else {
             put $i' '$xyr[$i] >&2
             fail 'not a valid XY char'
@@ -64,7 +64,7 @@ fn -parse-sub [line]{
 
     var submodule = [&]
 
-    if (==s 'S' $line[0..1]) {
+    if (==s $line[0..1] 'S') {
         for i [ (keys $s) ] {
             if (has-value [ 'C' 'M' 'U' ] $s[$i]) {
                 set submodule[$i] = $true
@@ -101,15 +101,15 @@ fn -map-modified [s]{
 fn -parse-modified [status input]{
     var path = $input[path]
 
-    var xy = (-parse-xy $input[xy])
-    set status[paths][$path][staged] = $xy[staged]
-    set status[paths][$path][unstaged] = $xy[unstaged]
-    var sub = (-parse-sub $input[sub])
+    var xy = (-parse-xy $input['xy'])
+    set status['paths'][$path]['staged'] = $xy['staged']
+    set status['paths'][$path]['unstaged'] = $xy['unstaged']
+    var sub = (-parse-sub $input['sub'])
     if (> (count $sub) 0) {
-        set status[paths][$path][submodule] = $sub
+        set status['paths'][$path]['submodule'] = $sub
     }
-    set status[paths][$path][mode] = $input[mode]
-    set status[paths][$path][object] = $input[obj]
+    set status['paths'][$path]['mode'] = $input['mode']
+    set status['paths'][$path]['object'] = $input['obj']
 
     put $status
 }
@@ -136,19 +136,19 @@ fn -map-renamed-copied [s]{
 }
 
 fn -parse-rename-copied [status input]{
-    var path = $input[path]
+    var path = $input['path']
 
-    var xy = (-parse-xy $input[xy])
-    set status[paths][$path][staged] = $xy[staged]
-    set status[paths][$path][unstaged] = $xy[unstaged]
-    var sub = (-parse-sub $input[sub])
+    var xy = (-parse-xy $input['xy'])
+    set status['paths'][$path]['staged'] = $xy['staged']
+    set status['paths'][$path]['unstaged'] = $xy['unstaged']
+    var sub = (-parse-sub $input['sub'])
     if (> (count $sub) 0) {
-        set status[paths][$path][submodule] = $sub
+        set status['paths'][$path]['submodule'] = $sub
     }
-    set status[paths][$path][mode] = $input[mode]
-    set status[paths][$path][object] = $input[obj]
-    set status[paths][$path][score] = $input[score]
-    set status[paths][$path][origpath] = $input[origpath]
+    set status['paths'][$path]['mode'] = $input['mode']
+    set status['paths'][$path]['object'] = $input['obj']
+    set status['paths'][$path]['score'] = $input['score']
+    set status['paths'][$path]['origpath'] = $input['origpath']
 
     put $status
 }
@@ -174,17 +174,17 @@ fn -map-unmerged [s]{
 }
 
 fn -parse-unmerged [status input]{
-    var path = $input[path]
+    var path = $input['path']
 
-    var xy = (-parse-xy $input[xy])
-    set status[paths][$path][staged] = $xy[staged]
-    set status[paths][$path][unstaged] = $xy[unstaged]
-    var sub = (-parse-sub $input[sub])
+    var xy = (-parse-xy $input['xy'])
+    set status['paths'][$path]['staged'] = $xy['staged']
+    set status['paths'][$path]['unstaged'] = $xy['unstaged']
+    var sub = (-parse-sub $input['sub'])
     if (> (count $sub) 0) {
-        set status[paths][$path][submodule] = $sub
+        set status['paths'][$path]['submodule'] = $sub
     }
-    set status[paths][$path][mode] = $input[mode]
-    set status[paths][$path][object] = $input[obj]
+    set status['paths'][$path]['mode'] = $input['mode']
+    set status['paths'][$path]['object'] = $input['obj']
 
     put $status
 }
@@ -192,9 +192,9 @@ fn -parse-unmerged [status input]{
 # Initializes a path object if it doesn't exist
 fn -initialize-path [status path]{
     try {
-        var _ = $status[paths][$path]
+        var _ = $status['paths'][$path]
     } except _ {
-        set status[paths][$path] = [&]
+        set status['paths'][$path] = [&]
     }
 
     put $status
@@ -229,24 +229,24 @@ fn status {
             }
         } elif (==s $line[0] '1') {
             var input = (-map-modified $line)
-            set gitStatus = (-initialize-path $gitStatus $input[path])
+            set gitStatus = (-initialize-path $gitStatus $input['path'])
             set gitStatus = (-parse-modified $gitStatus $input)
         } elif (==s $line[0] '2') {
             var input = (-map-modified $line)
-            set gitStatus = (-initialize-path $gitStatus $input[path])
+            set gitStatus = (-initialize-path $gitStatus $input['path'])
             set gitStatus = (-parse-renamed-copied $gitStatus $input)
         } elif (==s $line[0] 'u') {
             var input = (-map-modified $line)
-            set gitStatus = (-initialize-path $gitStatus $input[path])
+            set gitStatus = (-initialize-path $gitStatus $input['path'])
             set gitStatus = (-parse-unmerged $gitStatus $input)
         } elif (==s $line[0] '?') {
             var path = (str:join " " $line[1..])
             set gitStatus = (-initialize-path $gitStatus $path)
-            set gitStatus[paths][$path][untracked] = $true
+            set gitStatus['paths'][$path]['untracked'] = $true
         } elif (==s $line[0] '!') {
             var path = (str:join " " $line[1..])
             set gitStatus = (-initialize-path $gitStatus $path)
-            set gitStatus[paths][$path][ignored] = $true
+            set gitStatus['paths'][$path]['ignored'] = $true
         } else {
             put $line[0] >&2
             fail 'invalid type'
