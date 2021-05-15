@@ -31,7 +31,7 @@ fn -initialize-state [obj class num]{
 fn -parse-acpi {
     var acpiOutput = [ ]
     try {
-        set acpiOutput = [ (e:acpi -a -b) ]
+        set acpiOutput = [ (e:acpi '-a' '-b') ]
     } except _ {
         fail
     }
@@ -46,15 +46,15 @@ fn -parse-acpi {
     ]
     for i $acpiOutput {
         var expld = [ (str:split " " $i) ]
-        if (==s 'Adapter' $expld[0]) {
+        if (==s $expld[0] 'Adapter') {
             var num = (-num $expld[1])
-            set state = (-initialize-state $state adapters $num)
-            set state[adapters][$num][status] = $expld[2]
-        } elif (==s 'Battery' $expld[0]) {
+            set state = (-initialize-state $state 'adapters' $num)
+            set state[adapters][$num]['status'] = $expld[2]
+        } elif (==s $expld[0] 'Battery') {
             var num = (-num $expld[1])
-            set state = (-initialize-state $state batteries $num)
-            set state[batteries][$num][status] = (regex:find '(.*),' $expld[2])
-            set state[batteries][$num][charge] = (regex:find '(\d+)%' $expld[3])
+            set state = (-initialize-state $state 'batteries' $num)
+            set state[batteries][$num]['status'] = (regex:find '(.*),' $expld[2])
+            set state[batteries][$num]['charge'] = (regex:find '(\d+)%' $expld[3])
         } else {
             put $expld[0] >&2
             fail 'invalid type'
@@ -77,20 +77,20 @@ fn -parse-sysfs {
         &adapters=[&]
         &batteries=[&]
     ]
-    for dev (path:scandir $sysfs)[files] {
+    for dev (path:scandir $sysfs)['files'] {
         if (==s (path:basename $dev)[0..2] 'AC') {
             var num = (-sys-uid $dev)
-            set state = (-initialize-state $state adapters $num)
+            set state = (-initialize-state $state 'adapters' $num)
             var status = 'off-line'
             if (== [ (io:cat $dev'/online') ][0] 1) {
                 set status = 'on-line'
             }
-            set state[adapters][$num][status] = $status
+            set state['adapters'][$num]['status'] = $status
         } elif (==s (path:basename $dev)[0..3] 'BAT') {
             var num = (-sys-uid $dev)
-            set state = (-initialize-state $state batteries $num)
-            set state[batteries][$num][status] = (io:cat $dev'/status')
-            set state[batteries][$num][charge] = (io:cat $dev'/capacity')
+            set state = (-initialize-state $state 'batteries' $num)
+            set state['batteries'][$num]['status'] = (io:cat $dev'/status')
+            set state['batteries'][$num]['charge'] = (io:cat $dev'/capacity')
         } else {
             put $dev >&2
             fail 'invalid type'
@@ -102,16 +102,16 @@ fn -parse-sysfs {
 
 fn get-adapters {
     try {
-        put (-parse-sysfs)[adapters]
+        put (-parse-sysfs)['adapters']
     } except _ {
-        put (-parse-acpi)[adapters]
+        put (-parse-acpi)['adapters']
     }
 }
 
 fn get-batteries {
     try {
-        put (-parse-sysfs)[batteries]
+        put (-parse-sysfs)['batteries']
     } except _ {
-        put (-parse-acpi)[batteries]
+        put (-parse-acpi)['batteries']
     }
 }
