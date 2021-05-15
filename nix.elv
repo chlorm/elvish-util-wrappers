@@ -15,6 +15,7 @@
 
 use github.com/chlorm/elvish-stl/io
 use github.com/chlorm/elvish-stl/os
+use github.com/chlorm/elvish-stl/path
 use github.com/chlorm/elvish-stl/regex
 use github.com/chlorm/elvish-util-wrappers/su
 
@@ -33,7 +34,7 @@ fn clear-env {
 
 fn -user-buildenvs {
     var envs = [ ]
-    for line [ (io:cat (os:home)'/.nixpkgs/config.nix') ] {
+    for line [ (io:cat (path:home)'/.nixpkgs/config.nix') ] {
         var m = (regex:find '([0-9a-zA-Z_-]+)(?:[ ]+|)=.*buildEnv)' $line)
         if (!=s $m '') {
             set envs = [ $@envs $m ]
@@ -116,7 +117,7 @@ fn search [@attrs]{
 fn user-profile-init {
     use github.com/chlorm/elvish-stl/env
 
-    var home = (os:home)
+    var home = (path:home)
     var nixProfile = $home'/.nix-profile'
 
     # Append ~/.nix-defexpr/channels to $NIX_PATH so that <nixpkgs>
