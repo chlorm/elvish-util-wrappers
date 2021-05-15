@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2020, Cody Opel <cwopel@chlorm.net>
+# Copyright (c) 2019-2021, Cody Opel <cwopel@chlorm.net>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -110,5 +110,46 @@ fn search [@attrs]{
     for i $attrs {
         e:nix-env '-qaP' '.*'$i'.*' '-f' '<nixpkgs>'
     }
+}
+
+# Set up the per-user profile.
+fn user-profile-init {
+    use github.com/chlorm/elvish-stl/env
+
+    var home = (os:home)
+    var nixProfile = $home'/.nix-profile'
+
+    # Append ~/.nix-defexpr/channels to $NIX_PATH so that <nixpkgs>
+    # paths work when the user has fetched the Nixpkgs channel.
+    env:append 'NIXPATH' $home'/.nix-defexpr/channels'
+
+    # Set up environment.
+    set-env 'NIX_PROFILES' '/nix/var/nix/profiles/default '$home'/.nix-profile'
+
+    # Set $NIX_SSL_CERT_FILE so that Nixpkgs applications like curl work.
+    var hasCaCerts = $false
+    var caCertsPaths = [
+        # NixOS, Ubuntu, Debian, Gentoo, Arch
+        '/etc/ssl/certs/ca-certificates.crt'
+        # openSUSE Tumbleweed
+        '/etc/ssl/ca-bundle.pem'
+        # Fedora, CentOS
+        '/etc/pki/tls/certs/ca-bundle.crt'
+        # fallback to cacert in Nix profile
+        '/etc/ssl/certs/ca-bundle.crt'
+    ]
+    for p $caCertsPaths {
+        if (os:exists $p) {
+            set-env 'NIX_SSL_CERT_FILE' $p
+            set hasCaCerts = $true
+            break
+        }
+    }
+    if (not $hasCaCerts) {
+        fail 'ca certs not found'
+    }
+
+    env:prepend 'MANPATH' $nixProfile'/share/man'
+    env:prepend 'PATH' $nixProfile'/bin'
 }
 
