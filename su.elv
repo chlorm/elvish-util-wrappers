@@ -16,7 +16,7 @@
 use github.com/chlorm/elvish-stl/os
 
 
-fn sudo [@cmd]{
+fn do [@cmd]{
     # Don't use sudo if run as root
     var isRoot = (== (os:uid) 0)
     var hasDisplay = $false
@@ -30,7 +30,6 @@ fn sudo [@cmd]{
     } elif (and ?(search-external sudo) (not $isRoot)) {
         e:sudo $@cmd
     } else {
-        elvish -c $@cmd
+        elvish '-c' $@cmd
     }
 }
-
