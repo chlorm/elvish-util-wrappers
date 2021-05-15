@@ -16,7 +16,7 @@
 use github.com/chlorm/elvish-stl/io
 use github.com/chlorm/elvish-stl/os
 use github.com/chlorm/elvish-stl/regex
-use github.com/chlorm/elvish-util-wrappers/sudo
+use github.com/chlorm/elvish-util-wrappers/su
 
 
 # Clear environment variables in user environment polluted by makeWrapper.
@@ -33,7 +33,7 @@ fn clear-env {
 
 fn -user-buildenvs {
     var envs = [ ]
-    for line [ (io:cat (get-env HOME)'/.nixpkgs/config.nix') ] {
+    for line [ (io:cat (os:home)'/.nixpkgs/config.nix') ] {
         var m = (regex:find '([0-9a-zA-Z_-]+)(?:[ ]+|)=.*buildEnv)' $line)
         if (!=s $m '') {
             set envs = [ $@envs $m ]
@@ -45,7 +45,7 @@ fn -user-buildenvs {
 fn find-nixconfig-closures {
     var closures = [ ]
     for i [ (-user-buildenvs) ] {
-        set closures = [ $@closures (find '/nix/store' '-name' '*'$i'*') ]
+        set closures = [ $@closures (e:find '/nix/store' '-name' '*'$i'*') ]
     }
     put $closures
 }
@@ -55,7 +55,8 @@ fn find-nixos-closures {
 }
 
 fn build-iso [platform]{
-    e:nix-build (e:nix-instantiate --eval -E '<nixpkgs>')'/nixos/release.nix' ^
+    var nixpkgs = (e:nix-instantiate '--eval' '-E' '<nixpkgs>')
+    e:nix-build $nixpkgs'/nixos/release.nix' ^
         '-A' 'iso_minimal_new_kernel.'$platform
 }
 
@@ -92,17 +93,17 @@ fn remove-references [path]{
         fail 'Specified path does not exist: '$path
     }
 
-    for i [ (e:find -L $path -xtype 1 -name "result*") ] {
+    for i [ (e:find '-L' $path '-xtype' 1 '-name' 'result*') ] {
         if (and (os:is-file $path'/.git/config') ^
-                (!=s (io:cat $path'/.git/config' | grep 'triton') '')) {
+                (!=s (io:cat $path'/.git/config' | e:grep 'triton') '')) {
             os:remove $path
         }
     }
 }
 
 fn rebuild-system [target @args]{
-    sudo:sudo nixos-rebuild $target $@args ^
-        -I 'nixpkgs='(nix-instantiate --eval -E '<nixpkgs>')
+    su:do 'nixos-rebuild' $target $@args ^
+        '-I' 'nixpkgs='(e:nix-instantiate '--eval' '-E' '<nixpkgs>')
 }
 
 fn search [@attrs]{
