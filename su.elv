@@ -21,13 +21,13 @@ fn do [@cmd]{
     var isRoot = (== (os:uid) 0)
     var hasDisplay = $false
     try {
-        set hasDisplay = (!=s (get-env DISPLAY) '')
+        set hasDisplay = (!=s (get-env 'DISPLAY') '')
     } except _ {
         set hasDisplay = $false
     }
-    if (and $hasDisplay ?(search-external gksudo) (not $isRoot)) {
+    if (and $hasDisplay ?(search-external 'gksudo') (not $isRoot)) {
         e:gksudo $@cmd
-    } elif (and ?(search-external sudo) (not $isRoot)) {
+    } elif (and ?(search-external 'sudo') (not $isRoot)) {
         e:sudo $@cmd
     } else {
         elvish '-c' $@cmd
