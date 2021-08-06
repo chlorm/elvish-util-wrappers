@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2020, Cody Opel <cwopel@chlorm.net>
+# Copyright (c) 2019-2021, Cody Opel <cwopel@chlorm.net>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +13,15 @@
 # limitations under the License.
 
 
-use github.com/chlorm/elvish-util-wrappers/sudo
+use github.com/chlorm/elvish-util-wrappers/su
 
+
+fn add [device filesystem]{
+    su:do 'btrfs' 'device' 'add' $device $filesystem
+}
 
 fn balance [mode path &dusage=$nil &musage=$nil]{
-    modes = [
+    var modes = [
         'cancel'
         'pause'
         'resume'
@@ -25,46 +29,102 @@ fn balance [mode path &dusage=$nil &musage=$nil]{
         'status'
     ]
     has-value $modes $mode
-    opts = [ ]
+    var opts = [ ]
     if (or (==s $mode 'start') (==s $mode 'status')) {
-        opts = [ $@opts '-v' ]
+        set opts = [ $@opts '-v' ]
     }
     if (==s $mode 'start') {
         if (not (eq $dusage $nil)) {
-            opts = [ $@opts '-dusage='$dusage ]
+            set opts = [ $@opts '-dusage='$dusage ]
         }
         if (not (eq $musage $nil)) {
-            opts = [ $@opts '-musage='$musage ]
+            set opts = [ $@opts '-musage='$musage ]
         }
     }
-    sudo:sudo 'btrfs' 'balance' $mode $@opts $path
+    su:do 'btrfs' 'balance' $mode $@opts $path
 }
 
-fn defrag [path &compression='zstd']{
-    compressionAlgorithms = [
+fn defrag [path &compression='zstd' &compression-level='6']{
+    var compressionAlgorithms = [
         'lzo'
         'zlib'
         'zstd'
     ]
-    has-value $compressionAlgorithms $compression
-    sudo:sudo 'btrfs' 'filesystem' ^
-        'defragment' '-v' '-r' '-c'$compression '-f' $path
+    var opts = [ ]
+    if (not (eq $compression $nil)) {
+        has-value $compressionAlgorithms $compression
+        set opts = [ $@opts '-c'$compression':'$compression-level ]
+    }
+    su:do 'btrfs' 'filesystem' 'defragment' '-v' '-r' $@opts '-f' $path
+}
+
+# FIXME: set checksum flag
+fn mkfs [@devices &checksum='crc32c' &label=$nil &metadata=$nil &data=$nil]{
+    var valid-checksums = [
+        'crc32c'
+        'xxhash'
+        'blake2b'
+        'sha256'
+    ]
+    has-value $valid-checksums $checksum
+    var opts = [ ]
+    if (not (eq $label $nil)) {
+        set opts = [ $@opts '-L' $label ]
+    }
+    var valid-metadata = [
+        'single'
+        'dup'
+        'raid1'
+    ]
+    if (not (eq $metadata $nil)) {
+        set opts = [ $@opts '-m' $metadata ]
+    }
+    if (not (eq $data $nil)) {
+        set opts = [ $@opts '-d' $data ]
+    }
+    su:do 'mkfs.btrfs' $@opts $@devices
+}
+
+fn mount [device filesystem &subvol=$nil]{
+    if (not os:is-dir $filesystem) {
+        fail
+    }
+    var opts = [ ]
+    if (not (eq $subvol $nil)) {
+        set opts = [ $@opts '-o' 'subvol='$subvol ]
+    }
+    su:do 'mount' '-t' 'btrfs' $@opts $device $filesystem
+}
+
+fn replace [device filesystem]{
+    # FIXME: find devid programatically
+    #su:do 'btrfs' 'replace' 'start' $devid $device $filesystem
 }
 
 fn scrub [mode path &background=$false &ioprioclass=3 &ioprioclassdata=4]{
-    modes = [
+    var modes = [
         'cancel'
         'resume'
         'start'
         'status'
     ]
     has-value $modes $mode
-    opts = [ ]
+    # os:exists $path
+    # and (>= 0 $ioprioclass) (<= 3 $ioprioclass)
+    # and (>= 0 $ioprioclassdata) (<= 7 $ioprioclassdata)
+    var opts = [ ]
     if (or (==s $mode 'resume') (==s $mode 'start')) {
         if (not $background) {
-            opts = [ $@opts '-B' ]
+            # Run in foreground
+            set opts = [ $@opts '-B' ]
         }
-        opts = [ $@opts '-d' '-c'$ioprioclass '-n'$ioprioclassdata ]
+        # Print statistics
+        set opts = [ $@opts '-d' ]
+        set opts = [ $@opts '-c'$ioprioclass '-n'$ioprioclassdata ]
     }
-    sudo:sudo 'btrfs' 'scrub' $mode $@opts $path
+    su:do 'btrfs' 'scrub' $mode $@opts $path
+}
+
+fn subvol-create [subvol]{
+    su:do 'btrfs' 'subvolume' 'create' $subvol
 }
