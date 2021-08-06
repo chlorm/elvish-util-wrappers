@@ -22,14 +22,14 @@ use github.com/chlorm/elvish-util-wrappers/su
 
 # Clear environment variables in user environment polluted by makeWrapper.
 fn clear-env {
-    unset-env GDK_PIXBUF_MODULE_FILE
-    unset-env GI_TYPELIB_PATH
-    unset-env GIO_EXTRA_MODULES
-    unset-env GRL_PLUGIN_PATH
-    unset-env GST_PLUGIN_SYSTEM_PATH_1_0
-    unset-env GSETTINGS_SCHEMAS_PATH
-    unset-env XDG_DATA_DIRS
-    unset-env XDG_ICON_DIRS
+    unset-env 'GDK_PIXBUF_MODULE_FILE'
+    unset-env 'GI_TYPELIB_PATH'
+    unset-env 'GIO_EXTRA_MODULES'
+    unset-env 'GRL_PLUGIN_PATH'
+    unset-env 'GST_PLUGIN_SYSTEM_PATH_1_0'
+    unset-env 'GSETTINGS_SCHEMAS_PATH'
+    unset-env 'XDG_DATA_DIRS'
+    unset-env 'XDG_ICON_DIRS'
 }
 
 fn -user-buildenvs {
