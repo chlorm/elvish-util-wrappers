@@ -22,7 +22,7 @@ use github.com/chlorm/elvish-util-wrappers/su
 #         type=logical|primary
 #         fs=btrfs (optional)
 #         name='partition label'
-#         begin=''
+#         start=''
 #         end=''
 #         flags=[
 #             boot
@@ -60,7 +60,7 @@ fn new [device parts]{
         }
         set cmds = [
             $@cmds
-            'mkpart' $parts[$i]['type'] $fs $parts[$i][start] $parts[$i]['end']
+            'mkpart' $parts[$i]['type'] $fs $parts[$i]['start'] $parts[$i]['end']
             'name' $i $parts[$i]['name']
         ]
         if (has-key $parts[$i] 'flags') {
