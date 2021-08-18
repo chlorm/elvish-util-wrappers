@@ -13,6 +13,8 @@
 # limitations under the License.
 
 
+var CONF_DIR = (xdg:get-dir 'XDG_CONFIG_HOME')'/.ssh'
+
 fn generate-key [&type='ed25519' &passphrase=$nil &device-name=$nil &security-key=$false]{
     var types = [
         'ecdsa'
@@ -38,7 +40,7 @@ fn generate-key [&type='ed25519' &passphrase=$nil &device-name=$nil &security-ke
     var cmdArgs = [
         '-t' $type(if-sk '-sk')
         '-C' $name
-        '-f' $conf-dir'/id_'$type(if-sk '_sk')'-'$name
+        '-f' $CONF_DIR'/id_'$type(if-sk '_sk')'-'$name
     ]
     if (!=s $pass $nil) {
         set cmdArgs = [ $@cmdArgs '-N' $pass ]
@@ -56,15 +58,15 @@ fn generate-key [&type='ed25519' &passphrase=$nil &device-name=$nil &security-ke
         ]
     }
 
-    if (not (os:is-dir $conf-dir)) {
-        os:makedirs $conf-dir
+    if (not (os:is-dir $CONF_DIR)) {
+        os:makedirs $CONF_DIR
     }
-    if (not (os:is-file $conf-dir'/'$name'.pub')) {
+    if (not (os:is-file $CONF_DIR'/'$name'.pub')) {
         e:ssh-keygen $@cmdArgs
     }
 }
 
 fn update-known-hosts {
     var _ = (e:ssh-keygen '-H')
-    os:remove $conf-dir'/known_hosts.old'
+    os:remove $CONF_DIR'/known_hosts.old'
 }
