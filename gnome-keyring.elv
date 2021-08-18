@@ -39,7 +39,7 @@ fn start {
     var cmd = [(
         e:gnome-keyring-daemon ^
         '--components' 'ssh,secrets,pkcs11' ^
-        '--control-directory' $rundir ^
+        '--control-directory' $SOCKET_DIR ^
         '--daemonize'
     )]
 
