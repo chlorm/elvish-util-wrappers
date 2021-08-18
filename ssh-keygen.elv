@@ -42,8 +42,8 @@ fn generate-key [&type='ed25519' &passphrase=$nil &device-name=$nil &security-ke
         '-C' $name
         '-f' $CONF_DIR'/id_'$type(if-sk '_sk')'-'$name
     ]
-    if (!=s $pass $nil) {
-        set cmdArgs = [ $@cmdArgs '-N' $pass ]
+    if (!=s $passphrase $nil) {
+        set cmdArgs = [ $@cmdArgs '-N' $passphrase ]
     }
     # FIXME: assert $security-key == $false
     if (==s $type 'rsa') {
