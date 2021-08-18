@@ -23,7 +23,7 @@ fn -initialize-state [obj class num]{
     try {
         var _ = $obj[$class][$num]
     } except _ {
-        set obj[$class][$num]=[&]
+        set obj[$class][$num] = [&]
     }
     put $obj
 }
@@ -69,11 +69,11 @@ fn -sys-uid [dev]{
 }
 
 fn -parse-sysfs {
-    var local:sysfs = $E:ROOT'/sys/class/power_supply'
+    var sysfs = $E:ROOT'/sys/class/power_supply'
     if (not (os:exists $sysfs)) {
         fail 'cannot access sysfs'
     }
-    var local:state = [
+    var state = [
         &adapters=[&]
         &batteries=[&]
     ]
