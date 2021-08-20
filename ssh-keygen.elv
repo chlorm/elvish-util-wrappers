@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-var CONF_DIR = (xdg:get-dir 'XDG_CONFIG_HOME')'/.ssh'
+var CONF_DIR = (xdg:get-dir 'HOME')'/.ssh'
 
 fn generate-key [&type='ed25519' &passphrase=$nil &device-name=$nil &security-key=$false]{
     var types = [
