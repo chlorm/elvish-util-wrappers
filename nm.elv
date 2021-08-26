@@ -14,6 +14,7 @@
 
 
 use re
+use github.com/chlorm/elvish-stl/wrap
 
 
 # Find connectable wifi ssids.
