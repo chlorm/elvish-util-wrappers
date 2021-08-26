@@ -15,6 +15,7 @@
 
 use str
 use github.com/chlorm/elvish-stl/path
+use github.com/chlorm/elvish-stl/wrap
 use github.com/chlorm/elvish-xdg/xdg
 
 
@@ -27,7 +28,7 @@ fn set-permissions [agent]{
 
 # Manually envoke ssh-agent
 fn start {
-    var cmd = [ (e:ssh-agent '-c' '-a' $SOCKET) ]
+    var cmd = [ (wrap:cmd-out 'ssh-agent' '-c' '-a' $SOCKET) ]
 
     set-permissions
 

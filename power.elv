@@ -17,6 +17,7 @@ use str
 use github.com/chlorm/elvish-stl/io
 use github.com/chlorm/elvish-stl/path
 use github.com/chlorm/elvish-stl/regex
+use github.com/chlorm/elvish-stl/wrap
 
 
 fn -initialize-state [obj class num]{
@@ -31,7 +32,7 @@ fn -initialize-state [obj class num]{
 fn -parse-acpi {
     var acpiOutput = [ ]
     try {
-        set acpiOutput = [ (e:acpi '-a' '-b') ]
+        set acpiOutput = [ (wrap:cmd-out 'acpi' '-a' '-b') ]
     } except _ {
         fail
     }

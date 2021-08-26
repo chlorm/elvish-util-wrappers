@@ -15,6 +15,7 @@
 
 use str
 use github.com/chlorm/elvish-stl/regex
+use github.com/chlorm/elvish-stl/wrap
 
 
 fn -parse-xy [line]{
@@ -205,9 +206,9 @@ fn -initialize-path [status path]{
 fn status {
     var gitStatusOutput = [ ]
     try {
-        set gitStatusOutput = [
-            (e:git 'status' '--porcelain=2' '--branch' '--ignored')
-        ]
+        set gitStatusOutput = [(
+            wrap:cmd-out 'git' 'status' '--porcelain=2' '--branch' '--ignored'
+        )]
     } except e {
         fail $e
     }

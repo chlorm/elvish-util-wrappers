@@ -13,6 +13,9 @@
 # limitations under the License.
 
 
+use github.com/chlorm/elvish-stl/wrap
+
+
 var CONF_DIR = (xdg:get-dir 'HOME')'/.ssh'
 
 fn generate-key [&type='ed25519' &passphrase=$nil &device-name=$nil &security-key=$false]{
@@ -24,8 +27,8 @@ fn generate-key [&type='ed25519' &passphrase=$nil &device-name=$nil &security-ke
     var _ = (has-value $types $type)
 
     # FIXME: use elvish-stl
-    var date = (e:date '+%Y%m%d')
-    var name = $date'-'(e:hostname)
+    var date = (wrap:cmd-out 'date' '+%Y%m%d')
+    var name = $date'-'(wrap:cmd-out 'hostname')
     if $security-key {
         # FIXME: assert $device-name is not nil
         set name = $date'-'$device-name
@@ -67,6 +70,6 @@ fn generate-key [&type='ed25519' &passphrase=$nil &device-name=$nil &security-ke
 }
 
 fn update-known-hosts {
-    var _ = (e:ssh-keygen '-H')
+    wrap:cmd 'ssh-keygen' '-H'
     os:remove $CONF_DIR'/known_hosts.old'
 }
