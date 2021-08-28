@@ -16,10 +16,10 @@
 use github.com/chlorm/elvish-stl/os
 use github.com/chlorm/elvish-stl/path
 use github.com/chlorm/elvish-stl/utils
-use github.com/chlorm/elvish-xdg/xdg
+use github.com/chlorm/elvish-xdg/xdg-dirs
 
 
-var SOCKET_DIR = (xdg:get-dir 'XDG_RUNTIME_DIR')'/gnupg'
+var SOCKET_DIR = (xdg-dirs:runtime-dir)'/gnupg'
 var sockBase = '/S.gpg-agent'
 var SOCKET = $SOCKET_DIR$sockBase
 var SOCKET_BROWSER = $SOCKET_DIR$sockBase'.browser'

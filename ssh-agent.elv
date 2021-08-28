@@ -16,10 +16,10 @@
 use str
 use github.com/chlorm/elvish-stl/path
 use github.com/chlorm/elvish-stl/wrap
-use github.com/chlorm/elvish-xdg/xdg
+use github.com/chlorm/elvish-xdg/xdg-dirs
 
 
-var SOCKET = (xdg:get-dir 'XDG_RUNTIME_DIR')'/openssh/ssh-agent.socket'
+var SOCKET = (xdg-dirs:runtime-dir)'/openssh/ssh-agent.socket'
 
 fn set-permissions [agent]{
     os:chmod 0700 (path:dirname $SOCKET)

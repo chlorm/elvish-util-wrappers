@@ -15,10 +15,10 @@
 
 use github.com/chlorm/elvish-stl/path
 use github.com/chlorm/elvish-stl/wrap
-use github.com/chlorm/elvish-xdg/xdg
+use github.com/chlorm/elvish-xdg/xdg-dirs
 
 
-var SOCKET_DIR = (xdg:get-dir XDG_RUNTIME_DIR)'/keyring'
+var SOCKET_DIR = (xdg-dirs:runtime-dir)'/keyring'
 var SOCKET_CONTROL = $SOCKET_DIR'/control'
 var SOCKET_PKCS11 = $SOCKET_DIR'/pkcs11'
 var SOCKET_SSH = $SOCKET_DIR'/ssh'

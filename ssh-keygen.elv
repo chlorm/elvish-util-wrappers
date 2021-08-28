@@ -13,10 +13,11 @@
 # limitations under the License.
 
 
+use github.com/chlorm/elvish-stl/path
 use github.com/chlorm/elvish-stl/wrap
 
 
-var CONF_DIR = (xdg:get-dir 'HOME')'/.ssh'
+var CONF_DIR = (path:join (path:home) '.ssh')
 
 fn generate-key [&type='ed25519' &passphrase=$nil &device-name=$nil &security-key=$false]{
     var types = [
