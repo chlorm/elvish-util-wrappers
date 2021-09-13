@@ -29,42 +29,6 @@ fn -initialize-state [obj class num]{
     put $obj
 }
 
-fn -parse-acpi {
-    var acpiOutput = [ ]
-    try {
-        set acpiOutput = [ (wrap:cmd-out 'acpi' '-a' '-b') ]
-    } except _ {
-        fail
-    }
-
-    fn -num [n]{
-        put (regex:find '(\d+):' $n)
-    }
-
-    var state = [
-        &adapters=[&]
-        &batteries=[&]
-    ]
-    for i $acpiOutput {
-        var expld = [ (str:split " " $i) ]
-        if (==s $expld[0] 'Adapter') {
-            var num = (-num $expld[1])
-            set state = (-initialize-state $state 'adapters' $num)
-            set state[adapters][$num]['status'] = $expld[2]
-        } elif (==s $expld[0] 'Battery') {
-            var num = (-num $expld[1])
-            set state = (-initialize-state $state 'batteries' $num)
-            set state[batteries][$num]['status'] = (regex:find '(.*),' $expld[2])
-            set state[batteries][$num]['charge'] = (regex:find '(\d+)%' $expld[3])
-        } else {
-            put $expld[0] >&2
-            fail 'invalid type'
-        }
-    }
-
-    put $state
-}
-
 fn -sys-uid [dev]{
     put [ (io:cat $dev'/device/uid') ][0]
 }
@@ -102,17 +66,9 @@ fn -parse-sysfs {
 }
 
 fn get-adapters {
-    try {
-        put (-parse-sysfs)['adapters']
-    } except _ {
-        put (-parse-acpi)['adapters']
-    }
+    put (-parse-sysfs)['adapters']
 }
 
 fn get-batteries {
-    try {
-        put (-parse-sysfs)['batteries']
-    } except _ {
-        put (-parse-acpi)['batteries']
-    }
+    put (-parse-sysfs)['batteries']
 }
