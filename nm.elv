@@ -33,7 +33,7 @@ fn get-wifi-status {
 }
 
 # Turn wireless devices on/off.
-fn set-wifi-state [state]{
+fn set-wifi-state {|state|
     if (not (has-value [ 'on' 'off' ] $state)) {
         fail 'Invalid argument'
     }
@@ -56,7 +56,7 @@ fn get-wifi-interface {
 }
 
 # Add a new connection.
-fn add-wifi-connection [ssid pass]{
+fn add-wifi-connection {|ssid pass|
     e:nmcli ^
         'device' 'wifi' ^
         'connect' $ssid $pass ^
@@ -65,7 +65,7 @@ fn add-wifi-connection [ssid pass]{
 }
 
 # Connect to a saved connection.
-fn set-wifi-connection [ssid]{
+fn set-wifi-connection {|ssid|
     e:nmcli 'connection' 'up' 'id' $ssid
 }
 

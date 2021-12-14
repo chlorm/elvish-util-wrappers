@@ -16,11 +16,11 @@
 use github.com/chlorm/elvish-util-wrappers/su
 
 
-fn add [device filesystem]{
+fn add {|device filesystem|
     su:do 'btrfs' 'device' 'add' $device $filesystem
 }
 
-fn balance [mode path &dusage=$nil &musage=$nil]{
+fn balance {|mode path &dusage=$nil &musage=$nil|
     var modes = [
         'cancel'
         'pause'
@@ -44,7 +44,7 @@ fn balance [mode path &dusage=$nil &musage=$nil]{
     su:do 'btrfs' 'balance' $mode $@opts $path
 }
 
-fn defrag [path &compression='zstd' &compression-level='6']{
+fn defrag {|path &compression='zstd' &compression-level='6'|
     var compressionAlgorithms = [
         'lzo'
         'zlib'
@@ -59,7 +59,7 @@ fn defrag [path &compression='zstd' &compression-level='6']{
 }
 
 # FIXME: set checksum flag
-fn mkfs [@devices &checksum='crc32c' &label=$nil &metadata=$nil &data=$nil]{
+fn mkfs {|@devices &checksum='crc32c' &label=$nil &metadata=$nil &data=$nil|
     var valid-checksums = [
         'crc32c'
         'xxhash'
@@ -85,7 +85,7 @@ fn mkfs [@devices &checksum='crc32c' &label=$nil &metadata=$nil &data=$nil]{
     su:do 'mkfs.btrfs' $@opts $@devices
 }
 
-fn mount [device filesystem &subvol=$nil]{
+fn mount {|device filesystem &subvol=$nil|
     if (not os:is-dir $filesystem) {
         fail
     }
@@ -96,12 +96,12 @@ fn mount [device filesystem &subvol=$nil]{
     su:do 'mount' '-t' 'btrfs' $@opts $device $filesystem
 }
 
-fn replace [device filesystem]{
+fn replace {|device filesystem|
     # FIXME: find devid programatically
     #su:do 'btrfs' 'replace' 'start' $devid $device $filesystem
 }
 
-fn scrub [mode path &background=$false &ioprioclass=3 &ioprioclassdata=4]{
+fn scrub {|mode path &background=$false &ioprioclass=3 &ioprioclassdata=4|
     var modes = [
         'cancel'
         'resume'
@@ -125,6 +125,6 @@ fn scrub [mode path &background=$false &ioprioclass=3 &ioprioclassdata=4]{
     su:do 'btrfs' 'scrub' $mode $@opts $path
 }
 
-fn subvol-create [subvol]{
+fn subvol-create {|subvol|
     su:do 'btrfs' 'subvolume' 'create' $subvol
 }

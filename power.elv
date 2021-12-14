@@ -20,7 +20,7 @@ use github.com/chlorm/elvish-stl/regex
 use github.com/chlorm/elvish-stl/wrap
 
 
-fn -initialize-state [obj class num]{
+fn -initialize-state {|obj class num|
     try {
         var _ = $obj[$class][$num]
     } except _ {
@@ -29,7 +29,7 @@ fn -initialize-state [obj class num]{
     put $obj
 }
 
-fn -sys-uid [dev]{
+fn -sys-uid {|dev|
     put [ (io:cat $dev'/device/uid') ][0]
 }
 

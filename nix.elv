@@ -59,25 +59,25 @@ fn find-nixos-closures {
     put [ (wrap:cmd-out 'find' '/nix/store' '-name' '*'(hostname)'*') ]
 }
 
-fn build-iso [platform]{
+fn build-iso {|platform|
     var nixpkgs = (wrap:cmd-out 'nix-instantiate' '--eval' '-E' '<nixpkgs>')
     e:nix-build $nixpkgs'/nixos/release.nix' ^
         '-A' 'iso_minimal_new_kernel.'$platform
 }
 
-fn copy-closures [target @closures]{
+fn copy-closures {|target @closures|
     for i $closures {
         e:nix-copy-closure '--to' 'root@'$target $i
     }
 }
 
-fn install [@attrs]{
+fn install {|@attrs|
     for i $attrs {
         e:nix-env '-iA' $i '-f' '<nixpkgs>'
     }
 }
 
-fn rebuild-envs [@args]{
+fn rebuild-envs {|@args|
     var exceptions = [ ]
     for i [ (-user-buildenvs) ] {
         try {
@@ -93,7 +93,7 @@ fn rebuild-envs [@args]{
     }
 }
 
-fn remove-references [path]{
+fn remove-references {|path|
     if (not (os:is-dir $path)) {
         fail 'Specified path does not exist: '$path
     }
@@ -106,12 +106,12 @@ fn remove-references [path]{
     }
 }
 
-fn rebuild-system [target @args]{
+fn rebuild-system {|target @args|
     su:do 'nixos-rebuild' $target $@args ^
         '-I' 'nixpkgs='(e:nix-instantiate '--eval' '-E' '<nixpkgs>')
 }
 
-fn search [@attrs]{
+fn search {|@attrs|
     for i $attrs {
         e:nix-env '-qaP' '.*'$i'.*' '-f' '<nixpkgs>'
     }

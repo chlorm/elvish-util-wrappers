@@ -17,7 +17,7 @@ use github.com/chlorm/elvish-stl/os
 use github.com/chlorm/elvish-util-wrappers/su
 
 
-fn format [device &keyfile=$nil &keysize=256]{
+fn format {|device &keyfile=$nil &keysize=256|
     var extra-args = [ ]
     if (not (or (== $keysize 256) (== $keysize 512))) {
         fail
@@ -42,7 +42,7 @@ fn format [device &keyfile=$nil &keysize=256]{
         $@extra-args
 }
 
-fn open [device map &keyfile=$nil]{
+fn open {|device map &keyfile=$nil|
     var extra-args = [ ]
     if (not (eq $nil $keyfile)) {
         if (not (os:is-file $keyfile)) {
@@ -57,7 +57,7 @@ fn open [device map &keyfile=$nil]{
         $@extra-args
 }
 
-fn new-key [keyfile &bits=256]{
+fn new-key {|keyfile &bits=256|
     if (not (or (== $bits 256) (== $bits 512))) {
         fail
     }
@@ -65,15 +65,15 @@ fn new-key [keyfile &bits=256]{
     e:dd 'if=/dev/random' 'of=$keyfile' 'bs=1' 'count='$c
 }
 
-fn add-key [device keyfile]{
+fn add-key {|device keyfile|
     su:do 'cryptsetup' 'luksAddKey' $device $keyfile
 }
 
-fn read-key [device]{
+fn read-key {|device|
     su:do 'cryptsetup' 'luksBackupHeader'
 }
 
-fn wipe [device &random=$false]{
+fn wipe {|device &random=$false|
     var s = '/dev/zero'
     if $random {
         set s = '/dev/urandom'

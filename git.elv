@@ -18,7 +18,7 @@ use github.com/chlorm/elvish-stl/regex
 use github.com/chlorm/elvish-stl/wrap
 
 
-fn -parse-xy [line]{
+fn -parse-xy {|line|
     var xyr = [
         &staged=$line[0..1]
         &unstaged=$line[1..2]
@@ -56,7 +56,7 @@ fn -parse-xy [line]{
     put $xy
 }
 
-fn -parse-sub [line]{
+fn -parse-sub {|line|
     var s = [
         &commit=$line[1..2]
         &tracked=$line[2..3]
@@ -81,7 +81,7 @@ fn -parse-sub [line]{
     put $submodule
 }
 
-fn -map-modified [s]{
+fn -map-modified {|s|
     put [
         &type=$s[0]
         &xy=$s[1]
@@ -99,7 +99,7 @@ fn -map-modified [s]{
     ]
 }
 
-fn -parse-modified [status input]{
+fn -parse-modified {|status input|
     var path = $input[path]
 
     var xy = (-parse-xy $input['xy'])
@@ -115,7 +115,7 @@ fn -parse-modified [status input]{
     put $status
 }
 
-fn -map-renamed-copied [s]{
+fn -map-renamed-copied {|s|
     var p = [ (re:splits '\t' (str:join " " $s[9..])) ]
     put [
         &type=$s[0]
@@ -136,7 +136,7 @@ fn -map-renamed-copied [s]{
     ]
 }
 
-fn -parse-rename-copied [status input]{
+fn -parse-rename-copied {|status input|
     var path = $input['path']
 
     var xy = (-parse-xy $input['xy'])
@@ -154,7 +154,7 @@ fn -parse-rename-copied [status input]{
     put $status
 }
 
-fn -map-unmerged [s]{
+fn -map-unmerged {|s|
     put [
         &type=$s[0]
         &xy=$s[1]
@@ -174,7 +174,7 @@ fn -map-unmerged [s]{
     ]
 }
 
-fn -parse-unmerged [status input]{
+fn -parse-unmerged {|status input|
     var path = $input['path']
 
     var xy = (-parse-xy $input['xy'])
@@ -191,7 +191,7 @@ fn -parse-unmerged [status input]{
 }
 
 # Initializes a path object if it doesn't exist
-fn -initialize-path [status path]{
+fn -initialize-path {|status path|
     try {
         var _ = $status['paths'][$path]
     } except _ {

@@ -16,7 +16,7 @@
 use github.com/chlorm/elvish-stl/os
 
 
-fn do [@cmd]{
+fn do {|@cmd|
     # Don't use sudo if run as root
     var isRoot = (== (os:uid) 0)
     var hasDisplay = $false

@@ -30,7 +30,7 @@ use github.com/chlorm/elvish-util-wrappers/su
 #         ]
 #     ]
 # ]
-fn new [device parts]{
+fn new {|device parts|
     var cmds = [ 'mklabel' 'gpt' ]
     var valid-fs = [
         'btrfs'
