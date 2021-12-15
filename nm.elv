@@ -19,17 +19,17 @@ use github.com/chlorm/elvish-stl/wrap
 
 # Find connectable wifi ssids.
 fn get-wifi-list {
-    put (e:nmcli 'device' 'wifi' 'list')
+    e:nmcli 'device' 'wifi' 'list'
 }
 
 # List saved connection.
 fn get-wifi-connections {
-    put (e:nmcli 'connection')
+    e:nmcli 'connection'
 }
 
 # List active connections.
 fn get-wifi-status {
-    put (e:nmcli 'general' 'status')
+    e:nmcli 'general' 'status'
 }
 
 # Turn wireless devices on/off.
