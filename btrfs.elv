@@ -30,7 +30,7 @@ fn balance {|mode path &dusage=$nil &musage=$nil|
     ]
     has-value $modes $mode
     var opts = [ ]
-    if (or (==s $mode 'start') (==s $mode 'status')) {
+    if (has-value [ 'start' 'status' ] $mode) {
         set opts = [ $@opts '-v' ]
     }
     if (==s $mode 'start') {
@@ -113,7 +113,7 @@ fn scrub {|mode path &background=$false &ioprioclass=3 &ioprioclassdata=4|
     # and (>= 0 $ioprioclass) (<= 3 $ioprioclass)
     # and (>= 0 $ioprioclassdata) (<= 7 $ioprioclassdata)
     var opts = [ ]
-    if (or (==s $mode 'resume') (==s $mode 'start')) {
+    if (has-value [ 'resume' 'start' ] $mode) {
         if (not $background) {
             # Run in foreground
             set opts = [ $@opts '-B' ]
