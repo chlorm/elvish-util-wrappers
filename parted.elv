@@ -73,5 +73,5 @@ fn new {|device parts|
             }
         }
     }
-    su:do e:parted $device $cmds
+    su:do 'parted' $device $cmds
 }
