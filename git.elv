@@ -31,21 +31,22 @@ fn -parse-xy {|line|
 
     # NOTE: X is purposely omitted to throw an error.
     for i [ 'staged' 'unstaged' ] {
-        if (==s $xyr[$i] '.') {
+        var char = $xyr[$i]
+        if (==s $char '.') {
             set xy[$i]['unmodifed'] = $true
-        } elif (==s $xyr[$i] 'A') {
+        } elif (==s $char 'A') {
             set xy[$i]['added'] = $true
-        } elif (==s $xyr[$i] 'C') {
+        } elif (==s $char 'C') {
             set xy[$i]['copied'] = $true
-        } elif (==s $xyr[$i] 'D') {
+        } elif (==s $char 'D') {
             set xy[$i]['deleted'] = $true
-        } elif (==s $xyr[$i] 'M') {
+        } elif (==s $char 'M') {
             set xy[$i]['modified'] = $true
-        } elif (==s $xyr[$i] 'R') {
+        } elif (==s $char 'R') {
             set xy[$i]['renamed'] = $true
-        } elif (==s $xyr[$i] 'T') {
+        } elif (==s $char 'T') {
             set xy[$i]['typechange'] = $true
-        } elif (==s $xyr[$i] 'U') {
+        } elif (==s $char 'U') {
             set xy[$i]['unmerged'] = $true
         } else {
             put $i' '$xyr[$i] >&2
@@ -220,7 +221,8 @@ fn status {
 
     for i $gitStatusOutput {
         var line = [ (str:split " " $i) ]
-        if (==s $line[0] '#') {
+        var char = $line[0]
+        if (==s $char '#') {
             var header = (regex:find 'branch.([a-z]+)' $line[1])
             if (==s $header 'ab') {
                 set gitStatus[branch][ahead] = (regex:find '\+(\d+)' $line[2])
@@ -228,28 +230,28 @@ fn status {
             } else {
                 set gitStatus[branch][$header] = $line[2]
             }
-        } elif (==s $line[0] '1') {
+        } elif (==s $char '1') {
             var input = (-map-modified $line)
             set gitStatus = (-initialize-path $gitStatus $input['path'])
             set gitStatus = (-parse-modified $gitStatus $input)
-        } elif (==s $line[0] '2') {
+        } elif (==s $char '2') {
             var input = (-map-modified $line)
             set gitStatus = (-initialize-path $gitStatus $input['path'])
             set gitStatus = (-parse-renamed-copied $gitStatus $input)
-        } elif (==s $line[0] 'u') {
+        } elif (==s $char 'u') {
             var input = (-map-modified $line)
             set gitStatus = (-initialize-path $gitStatus $input['path'])
             set gitStatus = (-parse-unmerged $gitStatus $input)
-        } elif (==s $line[0] '?') {
+        } elif (==s $char '?') {
             var path = (str:join " " $line[1..])
             set gitStatus = (-initialize-path $gitStatus $path)
             set gitStatus['paths'][$path]['untracked'] = $true
-        } elif (==s $line[0] '!') {
+        } elif (==s $char '!') {
             var path = (str:join " " $line[1..])
             set gitStatus = (-initialize-path $gitStatus $path)
             set gitStatus['paths'][$path]['ignored'] = $true
         } else {
-            put $line[0] >&2
+            put $char >&2
             fail 'invalid type'
         }
     }
