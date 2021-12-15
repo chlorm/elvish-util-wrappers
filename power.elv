@@ -43,7 +43,8 @@ fn -parse-sysfs {
         &batteries=[&]
     ]
     for dev (path:scandir $sysfs)['files'] {
-        if (==s (path:basename $dev)[0..2] 'AC') {
+        var b = (path:basename $dev)
+        if (==s $b[0..2] 'AC') {
             var num = (-sys-uid $dev)
             set state = (-initialize-state $state 'adapters' $num)
             var status = 'off-line'
@@ -51,7 +52,7 @@ fn -parse-sysfs {
                 set status = 'on-line'
             }
             set state['adapters'][$num]['status'] = $status
-        } elif (==s (path:basename $dev)[0..3] 'BAT') {
+        } elif (==s $b[0..3] 'BAT') {
             var num = (-sys-uid $dev)
             set state = (-initialize-state $state 'batteries' $num)
             set state['batteries'][$num]['status'] = (io:cat $dev'/status')
