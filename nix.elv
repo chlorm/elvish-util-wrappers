@@ -82,7 +82,7 @@ fn rebuild-envs {|@args|
     for i [ (-user-buildenvs) ] {
         try {
             e:nix-env '-iA' $i '-f' '<nixpkgs>' $@args
-        } except e {
+        } catch e {
             set exceptions = [ $@exceptions $e ]
             continue
         }

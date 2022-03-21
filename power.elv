@@ -23,7 +23,7 @@ use github.com/chlorm/elvish-stl/wrap
 fn -initialize-state {|obj class num|
     try {
         var _ = $obj[$class][$num]
-    } except _ {
+    } catch _ {
         set obj[$class][$num] = [&]
     }
     put $obj

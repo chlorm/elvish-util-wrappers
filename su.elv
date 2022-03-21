@@ -22,7 +22,7 @@ fn do {|@cmd|
     var hasDisplay = $false
     try {
         set hasDisplay = (!=s (get-env 'DISPLAY') '')
-    } except _ {
+    } catch _ {
         set hasDisplay = $false
     }
     if (and $hasDisplay ?(search-external 'gksudo') (not $isRoot)) {

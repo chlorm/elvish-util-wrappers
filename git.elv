@@ -195,7 +195,7 @@ fn -parse-unmerged {|status input|
 fn -initialize-path {|status path|
     try {
         var _ = $status['paths'][$path]
-    } except _ {
+    } catch _ {
         set status['paths'][$path] = [&]
     }
 
@@ -210,7 +210,7 @@ fn status {
         set gitStatusOutput = [(
             wrap:cmd-out 'git' 'status' '--porcelain=2' '--branch' '--ignored'
         )]
-    } except e {
+    } catch e {
         fail $e
     }
 
