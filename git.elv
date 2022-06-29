@@ -14,8 +14,8 @@
 
 
 use str
+use github.com/chlorm/elvish-stl/exec
 use github.com/chlorm/elvish-stl/regex
-use github.com/chlorm/elvish-stl/wrap
 
 
 fn -parse-xy {|line|
@@ -208,7 +208,7 @@ fn status {
     var gitStatusOutput = [ ]
     try {
         set gitStatusOutput = [(
-            wrap:cmd-out 'git' 'status' '--porcelain=2' '--branch' '--ignored'
+            exec:cmd-out 'git' 'status' '--porcelain=2' '--branch' '--ignored'
         )]
     } catch e {
         fail $e

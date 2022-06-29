@@ -13,11 +13,11 @@
 # limitations under the License.
 
 
+use github.com/chlorm/elvish-stl/exec
 use github.com/chlorm/elvish-stl/io
 use github.com/chlorm/elvish-stl/os
 use github.com/chlorm/elvish-stl/path
 use github.com/chlorm/elvish-stl/regex
-use github.com/chlorm/elvish-stl/wrap
 use github.com/chlorm/elvish-util-wrappers/su
 
 
@@ -49,18 +49,18 @@ fn find-nixconfig-closures {
     for i [ (-user-buildenvs) ] {
         set closures = [
             $@closures
-            (wrap:cmd-out 'find' '/nix/store' '-name' '*'$i'*')
+            (exec:cmd-out 'find' '/nix/store' '-name' '*'$i'*')
         ]
     }
     put $closures
 }
 
 fn find-nixos-closures {
-    put [ (wrap:cmd-out 'find' '/nix/store' '-name' '*'(hostname)'*') ]
+    put [ (exec:cmd-out 'find' '/nix/store' '-name' '*'(hostname)'*') ]
 }
 
 fn build-iso {|platform|
-    var nixpkgs = (wrap:cmd-out 'nix-instantiate' '--eval' '-E' '<nixpkgs>')
+    var nixpkgs = (exec:cmd-out 'nix-instantiate' '--eval' '-E' '<nixpkgs>')
     e:nix-build $nixpkgs'/nixos/release.nix' ^
         '-A' 'iso_minimal_new_kernel.'$platform
 }
@@ -98,7 +98,7 @@ fn remove-references {|path|
         fail 'Specified path does not exist: '$path
     }
 
-    for i [ (wrap:cmd-out 'find' '-L' $path '-xtype' 1 '-name' 'result*') ] {
+    for i [ (exec:cmd-out 'find' '-L' $path '-xtype' 1 '-name' 'result*') ] {
         if (and (os:is-file $path'/.git/config') ^
                 (!=s (io:cat $path'/.git/config' | e:grep 'triton') '')) {
             os:remove $path

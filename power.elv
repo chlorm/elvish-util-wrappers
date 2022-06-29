@@ -17,7 +17,6 @@ use str
 use github.com/chlorm/elvish-stl/io
 use github.com/chlorm/elvish-stl/path
 use github.com/chlorm/elvish-stl/regex
-use github.com/chlorm/elvish-stl/wrap
 
 
 fn -initialize-state {|obj class num|

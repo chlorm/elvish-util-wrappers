@@ -14,7 +14,7 @@
 
 
 use re
-use github.com/chlorm/elvish-stl/wrap
+use github.com/chlorm/elvish-stl/exec
 
 
 # Find connectable wifi ssids.
@@ -43,7 +43,7 @@ fn set-wifi-state {|state|
 # Returns the first wireless device found.
 fn get-wifi-interface {
     var interface = ''
-    for i [ (wrap:cmd-out 'nmcli' 'device') ] {
+    for i [ (exec:cmd-out 'nmcli' 'device') ] {
         var s = [ (re:split '\s+' $i) ]
         if (==s $s[1] 'wifi') {
             set interface = $s[0]
