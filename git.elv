@@ -15,7 +15,9 @@
 
 use str
 use github.com/chlorm/elvish-stl/exec
-use github.com/chlorm/elvish-stl/regex
+use github.com/chlorm/elvish-stl/list
+use github.com/chlorm/elvish-stl/map
+use github.com/chlorm/elvish-stl/re
 
 
 fn -parse-xy {|line|
@@ -67,8 +69,8 @@ fn -parse-sub {|line|
     var submodule = [&]
 
     if (==s $line[0..1] 'S') {
-        for i [ (keys $s) ] {
-            if (has-value [ 'C' 'M' 'U' ] $s[$i]) {
+        for i [ (map:keys $s) ] {
+            if (list:has [ 'C' 'M' 'U' ] $s[$i]) {
                 set submodule[$i] = $true
             } else {
                 if (!=s '.' $s[$i]) {
@@ -223,10 +225,10 @@ fn status {
         var line = [ (str:split " " $i) ]
         var char = $line[0]
         if (==s $char '#') {
-            var header = (regex:find 'branch.([a-z]+)' $line[1])
+            var header = (re:find 'branch.([a-z]+)' $line[1])
             if (==s $header 'ab') {
-                set gitStatus[branch][ahead] = (regex:find '\+(\d+)' $line[2])
-                set gitStatus[branch][behind] = (regex:find '-(\d+)' $line[3])
+                set gitStatus[branch][ahead] = (re:find '\+(\d+)' $line[2])
+                set gitStatus[branch][behind] = (re:find '-(\d+)' $line[3])
             } else {
                 set gitStatus[branch][$header] = $line[2]
             }

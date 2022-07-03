@@ -15,6 +15,7 @@
 
 use re
 use github.com/chlorm/elvish-stl/exec
+use github.com/chlorm/elvish-stl/list
 
 
 # Find connectable wifi ssids.
@@ -34,7 +35,7 @@ fn get-wifi-status {
 
 # Turn wireless devices on/off.
 fn set-wifi-state {|state|
-    if (not (has-value [ 'on' 'off' ] $state)) {
+    if (not (list:has [ 'on' 'off' ] $state)) {
         fail 'Invalid argument'
     }
     e:nmcli 'radio' 'wifi' $state

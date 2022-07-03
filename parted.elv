@@ -13,6 +13,8 @@
 # limitations under the License.
 
 
+use github.com/chlorm/elvish-stl/list
+use github.com/chlorm/elvish-stl/map
 use github.com/chlorm/elvish-util-wrappers/su
 
 
@@ -51,11 +53,11 @@ fn new {|device parts|
         'logical'
         'primary'
     ]
-    for i [ (keys $parts) ] {
-        has-value $valid-types $parts[$i]['type']
+    for i [ (map:keys $parts) ] {
+        list:has $valid-types $parts[$i]['type']
         var fs = ''
-        if (has-key $parts[$i] 'fs') {
-            has-value $valid-fs $parts[$i]['fs']
+        if (map:has-key $parts[$i] 'fs') {
+            list:has $valid-fs $parts[$i]['fs']
             set fs = $parts[$i]['fs']
         }
         set cmds = [
@@ -63,9 +65,9 @@ fn new {|device parts|
             'mkpart' $parts[$i]['type'] $fs $parts[$i]['start'] $parts[$i]['end']
             'name' $i $parts[$i]['name']
         ]
-        if (has-key $parts[$i] 'flags') {
+        if (map:has-key $parts[$i] 'flags') {
             for o $parts[$i]['flags'] {
-                has-value $valid-flags $o
+                list:has $valid-flags $o
                 set cmds = [
                     $@cmds
                     'set' $i $o 'on'

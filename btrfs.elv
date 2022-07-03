@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+use github.com/chlorm/elvish-stl/list
 use github.com/chlorm/elvish-util-wrappers/su
 
 
@@ -28,9 +29,9 @@ fn balance {|mode path &dusage=$nil &musage=$nil|
         'start'
         'status'
     ]
-    has-value $modes $mode
+    list:has $modes $mode
     var opts = [ ]
-    if (has-value [ 'start' 'status' ] $mode) {
+    if (list:has [ 'start' 'status' ] $mode) {
         set opts = [ $@opts '-v' ]
     }
     if (==s $mode 'start') {
@@ -52,7 +53,7 @@ fn defrag {|path &compression='zstd' &compression-level='6'|
     ]
     var opts = [ ]
     if (not (eq $compression $nil)) {
-        has-value $compressionAlgorithms $compression
+        list:has $compressionAlgorithms $compression
         set opts = [ $@opts '-c'$compression':'$compression-level ]
     }
     su:do 'btrfs' 'filesystem' 'defragment' '-v' '-r' $@opts '-f' $path
@@ -66,7 +67,7 @@ fn mkfs {|@devices &checksum='crc32c' &label=$nil &metadata=$nil &data=$nil|
         'blake2b'
         'sha256'
     ]
-    has-value $valid-checksums $checksum
+    list:has $valid-checksums $checksum
     var opts = [ ]
     if (not (eq $label $nil)) {
         set opts = [ $@opts '-L' $label ]
@@ -108,12 +109,12 @@ fn scrub {|mode path &background=$false &ioprioclass=3 &ioprioclassdata=4|
         'start'
         'status'
     ]
-    has-value $modes $mode
+    list:has $modes $mode
     # os:exists $path
     # and (>= 0 $ioprioclass) (<= 3 $ioprioclass)
     # and (>= 0 $ioprioclassdata) (<= 7 $ioprioclassdata)
     var opts = [ ]
-    if (has-value [ 'resume' 'start' ] $mode) {
+    if (list:has [ 'resume' 'start' ] $mode) {
         if (not $background) {
             # Run in foreground
             set opts = [ $@opts '-B' ]

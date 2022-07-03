@@ -13,30 +13,31 @@
 # limitations under the License.
 
 
+use github.com/chlorm/elvish-stl/env
 use github.com/chlorm/elvish-stl/exec
 use github.com/chlorm/elvish-stl/io
 use github.com/chlorm/elvish-stl/os
 use github.com/chlorm/elvish-stl/path
-use github.com/chlorm/elvish-stl/regex
+use github.com/chlorm/elvish-stl/re
 use github.com/chlorm/elvish-util-wrappers/su
 
 
 # Clear environment variables in user environment polluted by makeWrapper.
 fn clear-env {
-    unset-env 'GDK_PIXBUF_MODULE_FILE'
-    unset-env 'GI_TYPELIB_PATH'
-    unset-env 'GIO_EXTRA_MODULES'
-    unset-env 'GRL_PLUGIN_PATH'
-    unset-env 'GST_PLUGIN_SYSTEM_PATH_1_0'
-    unset-env 'GSETTINGS_SCHEMAS_PATH'
-    unset-env 'XDG_DATA_DIRS'
-    unset-env 'XDG_ICON_DIRS'
+    env:unset 'GDK_PIXBUF_MODULE_FILE'
+    env:unset 'GI_TYPELIB_PATH'
+    env:unset 'GIO_EXTRA_MODULES'
+    env:unset 'GRL_PLUGIN_PATH'
+    env:unset 'GST_PLUGIN_SYSTEM_PATH_1_0'
+    env:unset 'GSETTINGS_SCHEMAS_PATH'
+    env:unset 'XDG_DATA_DIRS'
+    env:unset 'XDG_ICON_DIRS'
 }
 
 fn -user-buildenvs {
     var envs = [ ]
     for line [ (io:cat (path:home)'/.nixpkgs/config.nix') ] {
-        var m = (regex:find '([0-9a-zA-Z_-]+)(?:[ ]+|)=.*buildEnv)' $line)
+        var m = (re:find '([0-9a-zA-Z_-]+)(?:[ ]+|)=.*buildEnv)' $line)
         if (!=s $m '') {
             set envs = [ $@envs $m ]
         }
@@ -129,7 +130,7 @@ fn user-profile-init {
     env:append 'NIXPATH' $home'/.nix-defexpr/channels'
 
     # Set up environment.
-    set-env 'NIX_PROFILES' '/nix/var/nix/profiles/default '$home'/.nix-profile'
+    env:set 'NIX_PROFILES' '/nix/var/nix/profiles/default '$home'/.nix-profile'
 
     # Set $NIX_SSL_CERT_FILE so that Nixpkgs applications like curl work.
     var hasCaCerts = $false
@@ -145,7 +146,7 @@ fn user-profile-init {
     ]
     for p $caCertsPaths {
         if (os:exists $p) {
-            set-env 'NIX_SSL_CERT_FILE' $p
+            env:set 'NIX_SSL_CERT_FILE' $p
             set hasCaCerts = $true
             break
         }
