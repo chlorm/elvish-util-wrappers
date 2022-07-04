@@ -96,7 +96,8 @@ fn rebuild-envs {|@args|
 
 fn remove-references {|path|
     if (not (os:is-dir $path)) {
-        fail 'Specified path does not exist: '$path
+        var err = 'Specified path does not exist: '$path
+        fail $err
     }
 
     for i [ (exec:cmd-out 'find' '-L' $path '-xtype' 1 '-name' 'result*') ] {
