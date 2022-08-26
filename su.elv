@@ -27,9 +27,12 @@ fn do {|@cmd|
     }
     if (and $hasDisplay ?(search-external 'gksudo') (not $isRoot)) {
         e:gksudo $@cmd
-    } elif (and ?(search-external 'sudo') (not $isRoot)) {
-        e:sudo $@cmd
-    } else {
-        elvish '-c' $@cmd
+        return
     }
+    if (and ?(search-external 'sudo') (not $isRoot)) {
+        e:sudo $@cmd
+        return
+    }
+
+    elvish '-c' $@cmd
 }
