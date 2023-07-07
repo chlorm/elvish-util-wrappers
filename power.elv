@@ -15,6 +15,8 @@
 
 use github.com/chlorm/elvish-stl/io
 use github.com/chlorm/elvish-stl/path
+use github.com/chlorm/elvish-stl/platform
+use github.com/chlorm/elvish-stl/str
 
 
 fn -initialize-state {|obj class num|
@@ -27,7 +29,7 @@ fn -initialize-state {|obj class num|
 }
 
 fn -sys-uid {|dev|
-    put [ (io:cat $dev'/device/uid') ][0]
+    str:to-nonempty-lines (io:open $dev'/device/uid')
 }
 
 fn -parse-sysfs {
@@ -45,28 +47,32 @@ fn -parse-sysfs {
             var num = (-sys-uid $dev)
             set state = (-initialize-state $state 'adapters' $num)
             var status = 'off-line'
-            if (== [ (io:cat $dev'/online') ][0] 1) {
+            if (== (str:to-nonempty-lines (io: $dev'/online')) 1) {
                 set status = 'on-line'
             }
             set state['adapters'][$num]['status'] = $status
-        } elif (==s $b[0..3] 'BAT') {
+            continue
+        }
+        if (==s $b[0..3] 'BAT') {
             var num = (-sys-uid $dev)
             set state = (-initialize-state $state 'batteries' $num)
-            set state['batteries'][$num]['status'] = (io:cat $dev'/status')
-            set state['batteries'][$num]['charge'] = (io:cat $dev'/capacity')
-        } else {
-            put $dev >&2
-            fail 'invalid type'
+            set state['batteries'][$num]['status'] = (str:to-nonempty-lines (io:open $dev'/status'))
+            set state['batteries'][$num]['charge'] = (str:to-nonempty-lines (io:open $dev'/capacity'))
+            continue
         }
+        var err = 'invalid type: '$dev
+        fail $err
     }
 
     put $state
 }
 
 fn get-adapters {
+    if $platform:is-windows { fail }
     put (-parse-sysfs)['adapters']
 }
 
 fn get-batteries {
+    if $platform:is-windows { fail }
     put (-parse-sysfs)['batteries']
 }
