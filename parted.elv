@@ -54,10 +54,10 @@ fn new {|device parts|
         'primary'
     ]
     for i [ (map:keys $parts) ] {
-        list:has $valid-types $parts[$i]['type']
+        var _ = (list:has $valid-types $parts[$i]['type'])
         var fs = ''
         if (map:has-key $parts[$i] 'fs') {
-            list:has $valid-fs $parts[$i]['fs']
+            var _ = (list:has $valid-fs $parts[$i]['fs'])
             set fs = $parts[$i]['fs']
         }
         set cmds = [
@@ -67,7 +67,7 @@ fn new {|device parts|
         ]
         if (map:has-key $parts[$i] 'flags') {
             for o $parts[$i]['flags'] {
-                list:has $valid-flags $o
+                var _ = (list:has $valid-flags $o)
                 set cmds = [
                     $@cmds
                     'set' $i $o 'on'

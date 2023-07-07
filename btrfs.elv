@@ -29,7 +29,7 @@ fn balance {|mode path &dusage=$nil &musage=$nil|
         'start'
         'status'
     ]
-    list:has $modes $mode
+    var _ =(list:has $modes $mode)
     var opts = [ ]
     if (list:has [ 'start' 'status' ] $mode) {
         set opts = [ $@opts '-v' ]
@@ -67,7 +67,7 @@ fn mkfs {|@devices &checksum='crc32c' &label=$nil &metadata=$nil &data=$nil|
         'blake2b'
         'sha256'
     ]
-    list:has $valid-checksums $checksum
+    var _ = (list:has $valid-checksums $checksum)
     var opts = [ ]
     if (not (eq $label $nil)) {
         set opts = [ $@opts '-L' $label ]
@@ -109,7 +109,7 @@ fn scrub {|mode path &background=$false &ioprioclass=3 &ioprioclassdata=4|
         'start'
         'status'
     ]
-    list:has $modes $mode
+    var _ = (list:has $modes $mode)
     # os:exists $path
     # and (>= 0 $ioprioclass) (<= 3 $ioprioclass)
     # and (>= 0 $ioprioclassdata) (<= 7 $ioprioclassdata)
