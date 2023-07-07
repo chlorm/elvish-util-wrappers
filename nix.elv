@@ -19,6 +19,7 @@ use github.com/chlorm/elvish-stl/io
 use github.com/chlorm/elvish-stl/os
 use github.com/chlorm/elvish-stl/path
 use github.com/chlorm/elvish-stl/re
+use github.com/chlorm/elvish-stl/str
 use github.com/chlorm/elvish-util-wrappers/su
 
 
@@ -36,7 +37,7 @@ fn clear-env {
 
 fn -user-buildenvs {
     var envs = [ ]
-    for line [ (io:cat (path:home)'/.nixpkgs/config.nix') ] {
+    for line [ (str:to-lines (io:open (path:home)'/.nixpkgs/config.nix')) ] {
         var m = (re:find '([0-9a-zA-Z_-]+)(?:[ ]+|)=.*buildEnv)' $line)
         if (!=s $m '') {
             set envs = [ $@envs $m ]
@@ -102,7 +103,7 @@ fn remove-references {|path|
 
     for i [ (exec:cmd-out 'find' '-L' $path '-xtype' 1 '-name' 'result*') ] {
         if (and (os:is-file $path'/.git/config') ^
-                (!=s (io:cat $path'/.git/config' | e:grep 'triton') '')) {
+                (re:match 'triton' (io:open $path'/.git/config'))) {
             os:remove $path
         }
     }
