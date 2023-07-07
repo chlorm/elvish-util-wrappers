@@ -20,7 +20,7 @@ use github.com/chlorm/elvish-util-wrappers/su
 fn format {|device &keyfile=$nil &keysize=256|
     var extra-args = [ ]
     if (not (or (== $keysize 256) (== $keysize 512))) {
-        fail
+        fail 'Invalid keysize'
     }
     if (not (eq $nil $keyfile)) {
         if (not (os:exists $keyfile)) {
@@ -46,7 +46,7 @@ fn open {|device map &keyfile=$nil|
     var extra-args = [ ]
     if (not (eq $nil $keyfile)) {
         if (not (os:is-file $keyfile)) {
-            fail
+            fail 'Keyfile not found'
         }
         set extra-args = [
             $@extra-args
@@ -59,7 +59,7 @@ fn open {|device map &keyfile=$nil|
 
 fn new-key {|keyfile &bits=256|
     if (not (or (== $bits 256) (== $bits 512))) {
-        fail
+        fail 'Invalid bits size'
     }
     var c = (/ $bits 8)
     e:dd 'if=/dev/random' 'of=$keyfile' 'bs=1' 'count='$c

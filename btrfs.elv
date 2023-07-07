@@ -88,7 +88,7 @@ fn mkfs {|@devices &checksum='crc32c' &label=$nil &metadata=$nil &data=$nil|
 
 fn mount {|device filesystem &subvol=$nil|
     if (not os:is-dir $filesystem) {
-        fail
+        fail 'Mountpoint does not exist: '$filesystem
     }
     var opts = [ ]
     if (not (eq $subvol $nil)) {
