@@ -25,11 +25,11 @@ use github.com/chlorm/elvish-stl/platform
 fn get-profiles-ini {
     if $platform:is-windows {
         var appData = (env:get 'APPDATA')
-        put (path:join $appData 'mozilla' 'firefox' 'profiles.ini')
+        path:join $appData 'Mozilla' 'Firefox' 'profiles.ini'
         return
     }
 
-    put (path:join (path:home) '.mozilla' 'firefox' 'profiles.ini')
+    path:join (path:home) '.mozilla' 'firefox' 'profiles.ini'
 }
 
 fn get-default-profile {|profilesMap|
@@ -46,6 +46,7 @@ fn get-default-profile {|profilesMap|
         put $profilesMap[$i]['Path']
         return
     }
+
     echo (to-string $profilesMap) >&2
     fail 'Default profile not set'
 }
