@@ -14,25 +14,60 @@
 
 
 use github.com/chlorm/elvish-stl/env
+use github.com/chlorm/elvish-stl/exec
 use github.com/chlorm/elvish-stl/ini
 use github.com/chlorm/elvish-stl/io
 use github.com/chlorm/elvish-stl/map
 use github.com/chlorm/elvish-stl/os
 use github.com/chlorm/elvish-stl/path
 use github.com/chlorm/elvish-stl/platform
+use github.com/chlorm/elvish-stl/re
 
 
-fn get-profiles-ini {
+fn is-running {
+    var running = $true
+
     if $platform:is-windows {
-        var appData = (env:get 'APPDATA')
-        path:join $appData 'Mozilla' 'Firefox' 'profiles.ini'
-        return
+        try {
+            var _ = (exec:ps-out '[bool](Get-Process firefox)')
+        } catch _ {
+            set running = $false
+        }
     }
 
-    path:join (path:home) '.mozilla' 'firefox' 'profiles.ini'
+    put $running
 }
 
-fn get-default-profile {|profilesMap|
+fn get-dir {
+    var home = (path:home)
+    var firefoxDir = (path:join $home '.mozilla' 'firefox')
+
+    if $platform:is-windows {
+        var appData = (env:get 'APPDATA')
+        set firefoxDir = (path:join $appData 'Mozilla' 'Firefox')
+    }
+
+    put $firefoxDir
+}
+
+fn get-profiles-ini {
+    var firefoxDir = (get-dir)
+    var profilesIni = (path:join $firefoxDir 'profiles.ini')
+
+    put $profilesIni
+}
+
+fn get-profiles-map {
+    var profilesIni = (get-profiles-ini)
+    var profilesIniString = (io:open $profilesIni)
+    var profilesMap = (ini:unmarshal $profilesIniString)
+
+    put $profilesMap
+}
+
+fn get-default-profile {
+    var profilesMap = (get-profiles-map)
+
     if (< (count $profilesMap) 1) {
         fail 'No profiles'
     }
@@ -48,16 +83,28 @@ fn get-default-profile {|profilesMap|
     }
 
     echo (to-string $profilesMap) >&2
-    fail 'Default profile not set'
+    fail 'Default profile not set, add "Default=1" to the default profile.'
 }
 
 fn get-default-profile-dir {
-    var profilesIni = (get-profiles-ini)
-    var profilesIniMap = (ini:unmarshal (io:open $profilesIni))
-    var profilesRoot = (path:dirname $profilesIni)
-    var profileDirName = (get-default-profile $profilesIniMap)
-    var profileDir = (path:join $profilesRoot $profileDirName)
+    var firefoxDir = (get-dir)
+    var profileDirName = (get-default-profile)
+    var defaultProfileDir = (path:join $firefoxDir $profileDirName)
 
-    put $profileDir
+    put $defaultProfileDir
 }
 
+fn get-profile-dirs {
+    var firefoxDir = (get-dir)
+    var profilesMap = (get-profiles-map)
+
+    var profileDirs = [ ]
+    for i [ (map:keys $profilesMap) ] {
+        if (re:match 'Profile[0-9]+' $i) {
+            var profilePath = (path:join $firefoxDir $profilesMap[$i]['Path'])
+            set profileDirs = [ $@profileDirs $profilePath ]
+        }
+    }
+
+    put $profileDirs
+}
