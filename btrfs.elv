@@ -29,7 +29,7 @@ fn balance {|mode path &dusage=$nil &musage=$nil|
         'start'
         'status'
     ]
-    var _ =(list:has $modes $mode)
+    var _ = (list:has $modes $mode)
     var opts = [ ]
     if (list:has [ 'start' 'status' ] $mode) {
         set opts = [ $@opts '-v' ]
