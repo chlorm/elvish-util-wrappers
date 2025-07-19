@@ -59,7 +59,7 @@ fn get-profiles-ini {
 
 fn get-profiles-map {
     var profilesIni = (get-profiles-ini)
-    var profilesIniString = (io:open $profilesIni)
+    var profilesIniString = (io:read $profilesIni)
     var profilesMap = (ini:unmarshal $profilesIniString)
 
     put $profilesMap

@@ -80,7 +80,7 @@ fn stream-watcher {|@args|
 fn streams-manager {|&config=$nil &prio-min=2|
     if (eq $config $nil) {
         # TODO: xdg
-        set config = (ini:unmarshal (io:open (path:join (path:home) '.yt-dlp-streams.ini')))
+        set config = (ini:unmarshal (io:read (path:join (path:home) '.yt-dlp-streams.ini')))
     }
 
     var streams = [ ]

@@ -37,7 +37,7 @@ fn clear-env {
 
 fn -user-buildenvs {
     var envs = [ ]
-    for line [ (str:to-lines (io:open (path:home)'/.nixpkgs/config.nix')) ] {
+    for line [ (str:to-lines (io:read (path:home)'/.nixpkgs/config.nix')) ] {
         var m = (re:find '([0-9a-zA-Z_-]+)(?:[ ]+|)=.*buildEnv)' $line)
         if (!=s $m '') {
             set envs = [ $@envs $m ]
@@ -103,7 +103,7 @@ fn remove-references {|path|
 
     for i [ (exec:cmd-out 'find' '-L' $path '-xtype' 1 '-name' 'result*') ] {
         if (and (os:is-file $path'/.git/config') ^
-                (re:match 'triton' (io:open $path'/.git/config'))) {
+                (re:match 'triton' (io:read $path'/.git/config'))) {
             os:remove $path
         }
     }

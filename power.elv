@@ -29,7 +29,7 @@ fn -initialize-state {|obj class num|
 }
 
 fn -sys-uid {|dev|
-    str:to-nonempty-lines (io:open $dev'/device/uid')
+    str:to-nonempty-lines (io:read $dev'/device/uid')
 }
 
 fn -parse-sysfs {
@@ -56,8 +56,8 @@ fn -parse-sysfs {
         if (==s $b[0..3] 'BAT') {
             var num = (-sys-uid $dev)
             set state = (-initialize-state $state 'batteries' $num)
-            set state['batteries'][$num]['status'] = (str:to-nonempty-lines (io:open $dev'/status'))
-            set state['batteries'][$num]['charge'] = (str:to-nonempty-lines (io:open $dev'/capacity'))
+            set state['batteries'][$num]['status'] = (str:to-nonempty-lines (io:read $dev'/status'))
+            set state['batteries'][$num]['charge'] = (str:to-nonempty-lines (io:read $dev'/capacity'))
             continue
         }
         var err = 'invalid type: '$dev
