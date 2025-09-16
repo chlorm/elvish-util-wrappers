@@ -44,7 +44,12 @@ fn stream-download {|@args &root=$nil|
         $@args
 }
 
-fn stream-watcher {|@args|
+fn stream-watcher {|@args &root=$nil|
+    var download-root = (xdg-dirs:download-dir)
+    if (not (eq $root $nil)) {
+        set download-root = $root
+    }
+
     var counter = 0
     var s = $true
     var timeout-default = '10m'
@@ -52,7 +57,7 @@ fn stream-watcher {|@args|
     var clean-exit = $false
     while $s {
         try {
-            stream-download $@args
+            stream-download &root=$download-root $@args
             set clean-exit = $true
         } catch _ { }
 
@@ -77,7 +82,12 @@ fn stream-watcher {|@args|
     }
 }
 
-fn streams-manager {|&config=$nil &prio-min=2|
+fn streams-manager {|&config=$nil &prio-min=2 &root=$nil|
+    var download-root = (xdg-dirs:download-dir)
+    if (not (eq $root $nil)) {
+        set download-root = $root
+    }
+
     if (eq $config $nil) {
         # TODO: xdg
         set config = (ini:unmarshal (io:read (path:join (path:home) '.yt-dlp-streams.ini')))
@@ -98,7 +108,7 @@ fn streams-manager {|&config=$nil &prio-min=2|
         sleep '2s'
     } | peach {|i|
         echo 'Starting: '$i >&2
-        stream-watcher $i
+        stream-watcher &root=$download-root $i
     }
 }
 
