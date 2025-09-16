@@ -40,7 +40,9 @@ fn stream-download {|@args &root=$nil|
         '--no-part' ^
         '--hls-use-mpegts' ^
         '--downloader' 'm3u8:ffmpeg' ^
-        '-o' (path:join $download-root 'streams' '%(title)s %(webpage_url_domain.:-4)s.ts') ^
+        '--paths' 'temp:'(path:join $download-root 'live') ^
+        '--paths' 'home:'(path:join $download-root 'past') ^
+        '--output' '%(title)s %(webpage_url_domain.:-4)s.ts' ^
         $@args
 }
 
